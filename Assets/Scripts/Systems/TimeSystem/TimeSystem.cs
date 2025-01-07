@@ -4,9 +4,10 @@ using UnityEngine;
 public class TimeSystem : MonoBehaviour
 {
     [SerializeField, Range(1, 1000)]
-    private float TimeSpeed = 1;
+    private float timeSpeed = 1;
 
-    public event Action<int, int> timeChanged;
+    public event Action<int> hoursChanged;
+    public event Action<int> minutesChanged;
     public event Action<DateTime> dateChanged;
 
     public int CurrentHour
@@ -18,7 +19,7 @@ public class TimeSystem : MonoBehaviour
         set
         {
             _currentHour = Math.Clamp(value, 0, 23);
-            timeChanged?.Invoke(_currentHour, _currentMinute);
+            hoursChanged?.Invoke(_currentHour);
         }
     }
     private int _currentHour;
@@ -42,7 +43,7 @@ public class TimeSystem : MonoBehaviour
                     _currentHour = 0;
                 }
             }
-            timeChanged?.Invoke(_currentHour, _currentMinute);
+            minutesChanged?.Invoke(_currentMinute);
         }
     }
     private int _currentMinute;
@@ -61,14 +62,15 @@ public class TimeSystem : MonoBehaviour
     }
     private DateTime _currentDate;
 
-    private const int cycle = 60;
-    private const int hourCycle = 24;
+    public const int cycle = 60;
+    public const int hourCycle = 24;
 
     private bool useTime;
     private float t = 0;
 
     private void Start()
     {
+        TimeSettings.TimeSpeed = timeSpeed;
         StartDay();
     }
 
@@ -78,7 +80,6 @@ public class TimeSystem : MonoBehaviour
         CurrentMinute = 0;
         useTime = true;
     }
-
 
     private void Update()
     {

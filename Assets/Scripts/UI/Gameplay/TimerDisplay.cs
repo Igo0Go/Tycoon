@@ -6,16 +6,25 @@ public class TimerDisplay : MonoBehaviour
     [SerializeField]
     private TMP_Text timerText;
 
+    private TimeSystem timeSystem;
+
     private void Awake()
     {
-        FindObjectOfType<TimeSystem>().timeChanged += OnTimeChanged;
+        timeSystem = FindObjectOfType<TimeSystem>();
+        timeSystem.hoursChanged += OnHoursChanged;
+        timeSystem.minutesChanged += OnMinutesChanged;
     }
 
-    private void OnTimeChanged(int hour, int minute)
+    private void OnHoursChanged(int hour)
+    {
+        timerText.text = hour.ToString() + ":" + timeSystem.CurrentMinute;
+    }
+
+    private void OnMinutesChanged(int minute)
     {
         string minutes = string.Empty;
 
-        if(minute < 10)
+        if (minute < 10)
         {
             minutes = "0" + minute;
         }
@@ -24,6 +33,6 @@ public class TimerDisplay : MonoBehaviour
             minutes = minute.ToString();
         }
 
-        timerText.text = hour.ToString() + ":" + minutes;
+        timerText.text = timeSystem.CurrentHour + ":" + minutes;
     }
 }
