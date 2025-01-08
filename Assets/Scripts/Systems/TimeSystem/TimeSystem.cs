@@ -6,9 +6,20 @@ public class TimeSystem : MonoBehaviour
     [SerializeField, Range(1, 1000)]
     private float timeSpeed = 1;
 
+    [SerializeField, TextArea(5, 10)]
+    private string lunchMessage;
+    [SerializeField, TextArea(5, 10)]
+    private string startDayMessage;
+    [SerializeField, TextArea(5, 10)]
+    private string endDayMessage;
+
     public event Action<int> hoursChanged;
     public event Action<int> minutesChanged;
     public event Action<DateTime> dateChanged;
+    public event Action startLunch;
+    public event Action startWork;
+    public event Action endDay;
+
 
     public int CurrentHour
     {
@@ -20,6 +31,7 @@ public class TimeSystem : MonoBehaviour
         {
             _currentHour = Math.Clamp(value, 0, 23);
             hoursChanged?.Invoke(_currentHour);
+            CheckDatePart();
         }
     }
     private int _currentHour;
@@ -42,6 +54,7 @@ public class TimeSystem : MonoBehaviour
                 {
                     _currentHour = 0;
                 }
+                CheckDatePart();
             }
             minutesChanged?.Invoke(_currentMinute);
         }
@@ -64,21 +77,21 @@ public class TimeSystem : MonoBehaviour
 
     public const int cycle = 60;
     public const int hourCycle = 24;
+    private const int startDayHour = 9;
+    private const int endDayHour = 18;
+    private const int startLunchHour = 13;
+    private const int endLunchHour = 14;
 
+    private DayPart currentDayPart;
     private bool useTime;
     private float t = 0;
 
+
     private void Start()
     {
+        CurrentDate = DateTime.Now;
         TimeSettings.TimeSpeed = timeSpeed;
-        StartDay();
-    }
-
-    public void StartDay()
-    {
-        CurrentHour = 9;
-        CurrentMinute = 0;
-        useTime = true;
+        StartNewDay();
     }
 
     private void Update()
@@ -93,9 +106,72 @@ public class TimeSystem : MonoBehaviour
             }
         }
     }
+
+    public void StartNewDay()
+    {
+        CurrentHour = 9;
+        CurrentMinute = 0;
+        useTime = true;
+        startWork?.Invoke();
+
+        if(CurrentDate.DayOfWeek == DayOfWeek.Friday)
+        {
+            CurrentDate = CurrentDate.AddDays(3);
+        }
+        else
+        {
+            CurrentDate = CurrentDate.AddDays(1);
+        }
+
+        GameUICenter.messagePanel.ShowMessage("Новый день!", startDayMessage);
+    }
+
+    public void SkipLunch()
+    {
+        _currentMinute = 0;
+        CurrentHour = endLunchHour;
+    }
+
+    private void CheckDatePart()
+    {
+        if ((CurrentHour >= startDayHour && CurrentHour < startLunchHour) ||
+            (CurrentHour >= endLunchHour && CurrentHour < endDayHour))
+        {
+            if(currentDayPart != DayPart.Work)
+            {
+                currentDayPart = DayPart.Work;
+                startWork?.Invoke();
+            }
+        }
+        else if (CurrentHour >= startLunchHour && CurrentHour < endLunchHour)
+        {
+            if(currentDayPart != DayPart.Lunch)
+            {
+                currentDayPart = DayPart.Lunch;
+                startLunch?.Invoke();
+                GameUICenter.messagePanel.ShowMessage("На обед!", lunchMessage, SkipLunch, () => { });
+            }
+        }
+        else if (CurrentHour >= endDayHour || CurrentHour < startDayHour)
+        {
+            if(currentDayPart != DayPart.HomeTime)
+            {
+                currentDayPart = DayPart.HomeTime;
+                endDay?.Invoke();
+                GameUICenter.messagePanel.ShowMessage("Пока-пока!", endDayMessage, StartNewDay, () => { });
+            }
+        }
+    }
 }
 
 public static class TimeSettings
 {
     public static float TimeSpeed = 1;
+}
+
+public enum DayPart
+{
+    Work,
+    Lunch,
+    HomeTime
 }

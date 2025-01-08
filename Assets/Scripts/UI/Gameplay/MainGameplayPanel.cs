@@ -4,10 +4,13 @@ public class MainGameplayPanel : MonoBehaviour
 {
     [SerializeField]
     private TimeSkipPanel skipTimePanel;
+    [SerializeField]
+    private MessagePanel messagePanel;
 
     private void Awake()
     {
         skipTimePanel.gameObject.SetActive(false);
+        GameUICenter.messagePanel = messagePanel;
     }
 
     public void ShowSkipPanel()
@@ -20,4 +23,9 @@ public class MainGameplayPanel : MonoBehaviour
     {
         Application.Quit();
     }
+}
+
+public static class GameUICenter
+{
+    public static MessagePanel messagePanel;
 }
