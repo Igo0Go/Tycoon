@@ -16,9 +16,9 @@ public class TimeSkipPanel : MonoBehaviour
     private int currentHour;
     private int currentMinute;
 
-    private void Awake()
+    public void SubscribeEvents(TimeSystem timeSystem)
     {
-        timeSystem = FindObjectOfType<TimeSystem>();
+        this.timeSystem = timeSystem;
         timeSystem.hoursChanged += SetHourTextForSkipPanel;
         timeSystem.minutesChanged += SetMinuteTextForSkipPanel;
 

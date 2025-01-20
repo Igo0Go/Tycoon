@@ -13,9 +13,9 @@ public class TimerDisplay : MonoBehaviour
 
     private TimeSystem timeSystem;
 
-    private void Awake()
+    public void SubscribeEvents(TimeSystem timeSystem)
     {
-        timeSystem = FindObjectOfType<TimeSystem>();
+        this.timeSystem = timeSystem;
         timeSystem.hoursChanged += OnHoursChanged;
         timeSystem.minutesChanged += OnMinutesChanged;
         timeSystem.startWork += ()=> OnDayPartChanged("Работа");

@@ -87,7 +87,7 @@ public class TimeSystem : MonoBehaviour
     private float t = 0;
 
 
-    private void Start()
+    public void SetUp()
     {
         CurrentDate = DateTime.Now;
         TimeSettings.TimeSpeed = timeSpeed;

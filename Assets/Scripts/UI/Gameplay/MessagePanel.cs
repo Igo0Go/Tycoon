@@ -21,7 +21,7 @@ public class MessagePanel : MonoBehaviour
     [SerializeField]
     private Button noButton;
 
-    private void Awake()
+    public void SubscribeEvents()
     {
         okButton.onClick.AddListener(OnOkButtonClick);
         yesButton.onClick.AddListener(OnYesButtonClick);

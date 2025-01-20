@@ -7,10 +7,9 @@ public class MainGameplayPanel : MonoBehaviour
     [SerializeField]
     private MessagePanel messagePanel;
 
-    private void Awake()
+    public void SetUp()
     {
         skipTimePanel.gameObject.SetActive(false);
-        GameUICenter.messagePanel = messagePanel;
     }
 
     public void ShowSkipPanel()
