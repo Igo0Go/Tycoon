@@ -26,5 +26,5 @@ public class MainGameplayPanel : MonoBehaviour
 
 public static class GameUICenter
 {
-    public static MessagePanel messagePanel;
+    public static MessageQueue messageQueue;
 }

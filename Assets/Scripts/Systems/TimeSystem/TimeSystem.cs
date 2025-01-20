@@ -123,7 +123,7 @@ public class TimeSystem : MonoBehaviour
             CurrentDate = CurrentDate.AddDays(1);
         }
 
-        GameUICenter.messagePanel.ShowMessage("Новый день!", startDayMessage);
+        GameUICenter.messageQueue.PrepareMessage("Новый день!", startDayMessage);
     }
 
     public void SkipLunch()
@@ -149,7 +149,7 @@ public class TimeSystem : MonoBehaviour
             {
                 currentDayPart = DayPart.Lunch;
                 startLunch?.Invoke();
-                GameUICenter.messagePanel.ShowMessage("На обед!", lunchMessage, SkipLunch, () => { });
+                GameUICenter.messageQueue.PrepareMessage("На обед!", lunchMessage, SkipLunch, () => { });
             }
         }
         else if (CurrentHour >= endDayHour || CurrentHour < startDayHour)
@@ -158,7 +158,7 @@ public class TimeSystem : MonoBehaviour
             {
                 currentDayPart = DayPart.HomeTime;
                 endDay?.Invoke();
-                GameUICenter.messagePanel.ShowMessage("Пока-пока!", endDayMessage, StartNewDay, () => { });
+                GameUICenter.messageQueue.PrepareMessage("Пока-пока!", endDayMessage, StartNewDay, () => { });
             }
         }
     }

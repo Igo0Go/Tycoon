@@ -21,16 +21,31 @@ public class MessagePanel : MonoBehaviour
     [SerializeField]
     private Button noButton;
 
-    public void SubscribeEvents()
+    public event Action messageHiden;
+
+    public void SubscribeEvents(MessageQueue messageQueue)
     {
         okButton.onClick.AddListener(OnOkButtonClick);
         yesButton.onClick.AddListener(OnYesButtonClick);
         noButton.onClick.AddListener(OnNoButtonClick);
-
+        messageQueue.messageReceived += ShowMessage;
+        messageQueue.noMoreMessages += () => panel.SetActive(false);
         HideAll();
     }
 
-    public void ShowMessage(string header, string message)
+    public void ShowMessage(MessageInfo info)
+    {
+        if(info.yesAction == null)
+        {
+            ShowMessage(info.Header, info.Message);
+        }
+        else
+        {
+            ShowMessage(info.Header, info.Message, info.yesAction, info.noAction);
+        }
+    }
+
+    private void ShowMessage(string header, string message)
     {
         HideAll();
         panel.SetActive(true);
@@ -39,7 +54,7 @@ public class MessagePanel : MonoBehaviour
         okButton.gameObject.SetActive(true);
     }
 
-    public void ShowMessage(string header, string message, Action yesAction, Action noAction)
+    private void ShowMessage(string header, string message, Action yesAction, Action noAction)
     {
         HideAll();
         panel.SetActive(true);
@@ -60,18 +75,18 @@ public class MessagePanel : MonoBehaviour
     }
     private void OnOkButtonClick()
     {
-        panel.SetActive(false);
+        messageHiden?.Invoke();
     }
     private void OnYesButtonClick()
     {
         yesEvent?.Invoke();
         yesEvent = null;
-        panel.SetActive(false);
+        messageHiden?.Invoke();
     }
     private void OnNoButtonClick()
     {
         noEvent?.Invoke();
         noEvent = null;
-        panel.SetActive(false);
+        messageHiden?.Invoke();
     }
 }

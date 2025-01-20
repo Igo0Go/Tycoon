@@ -12,9 +12,11 @@ public class GameCenter : MonoBehaviour
         TimeSkipPanel timeSkipPanel = FindObjectOfType<TimeSkipPanel>();
         MessagePanel messagePanel = FindObjectOfType<MessagePanel>();
         ResourcePanel resourcePanel = FindObjectOfType<ResourcePanel>();
+        MessageQueue messageQueue = FindObjectOfType<MessageQueue>();
 
-        GameUICenter.messagePanel = messagePanel;
-        messagePanel.SubscribeEvents();
+        GameUICenter.messageQueue = messageQueue;
+        messagePanel.SubscribeEvents(messageQueue);
+        messageQueue.SubscribeEvents(messagePanel);
         timeSkipPanel.SubscribeEvents(timeSystem);
         timerDisplay.SubscribeEvents(timeSystem);
         mainGameplayPanel.SetUp();

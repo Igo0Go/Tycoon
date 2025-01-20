@@ -2053,6 +2053,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 776447059}
   m_CullTransparentMesh: 1
+--- !u!1 &778953877
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 778953878}
+  - component: {fileID: 778953879}
+  m_Layer: 0
+  m_Name: MessageQueue
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &778953878
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 778953877}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1164471727}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &778953879
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 778953877}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54baedf2116063f4eb65c0a7c485d9e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &800323892
 GameObject:
   m_ObjectHideFlags: 0
@@ -3305,6 +3349,7 @@ MonoBehaviour:
   currentSum: 400
   dayRentCost: 500
   dayUtilityCosts: 25
+  financeLostText: 
 --- !u!1 &1012630149
 GameObject:
   m_ObjectHideFlags: 0
@@ -4115,6 +4160,7 @@ Transform:
   m_Children:
   - {fileID: 1345846732}
   - {fileID: 994326079}
+  - {fileID: 778953878}
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -4726,7 +4772,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fda77dac6f8a13a4bb7a5af02ba03a11, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  timeSpeed: 1000
+  timeSpeed: 1
   lunchMessage: "\u0413\u043E\u043B\u043E\u0434\u043D\u044B\u043C \u043C\u043D\u043E\u0433\u043E
     \u043D\u0435 \u043D\u0430\u0440\u0430\u0431\u043E\u0442\u0430\u0435\u0448\u044C.\n\u041F\u043E\u0440\u0430
     \u0441\u0434\u0435\u043B\u0430\u0442\u044C \u043F\u0435\u0440\u0435\u0440\u044B\u0432

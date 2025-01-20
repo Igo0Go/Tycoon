@@ -26,7 +26,7 @@ public class FinanceSystem : MonoBehaviour
             {
                 currentSum = 0;
                 financeLost?.Invoke();
-                GameUICenter.messagePanel.ShowMessage("Вы - банкроты!", financeLostText);
+                GameUICenter.messageQueue.PrepareMessage("Вы - банкроты!", financeLostText);
             }
             currentSummChanged?.Invoke(currentSum);
         }
@@ -50,7 +50,8 @@ public class FinanceSystem : MonoBehaviour
 
     private void OnDayEnded()
     {
-        CurrentSum -= dayRentCost;
-        CurrentSum -= dayUtilityCosts;
+        GameUICenter.messageQueue.PrepareMessage("Ваш чек", "За аренду помещения и сопуствующие услуги требуется заплатить " + 
+            (dayRentCost + dayUtilityCosts).ToString());
+        CurrentSum -= (dayRentCost + dayUtilityCosts);
     }
 }
