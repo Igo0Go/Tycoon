@@ -13,6 +13,7 @@ public class GameCenter : MonoBehaviour
         MessagePanel messagePanel = FindObjectOfType<MessagePanel>();
         ResourcePanel resourcePanel = FindObjectOfType<ResourcePanel>();
         MessageQueue messageQueue = FindObjectOfType<MessageQueue>();
+        EmployeeSystem employeeSystem = FindObjectOfType<EmployeeSystem>();
 
         GameUICenter.messageQueue = messageQueue;
         messagePanel.SubscribeEvents(messageQueue);
@@ -23,9 +24,11 @@ public class GameCenter : MonoBehaviour
 
 
         financeSystem.SubscribeEvents(timeSystem);
-        resourcePanel.SubscribeEvents(financeSystem);
+        employeeSystem.SubscribeEvents(timeSystem);
+        resourcePanel.SubscribeEvents(financeSystem, employeeSystem);
 
         financeSystem.SetUp();
+        employeeSystem.SetUp();
         timeSystem.SetUp();
     }
 }
