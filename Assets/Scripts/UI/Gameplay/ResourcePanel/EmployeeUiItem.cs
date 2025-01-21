@@ -36,6 +36,6 @@ public class EmployeeUiItem : MonoBehaviour
     {
         nameText.text = emp.Name;
         stateText.text = emp.State;
-        paymentText.text = emp.GetSalary().ToString() + "/Ä";
+        paymentText.text = emp.GetSalaryInfo();
     }
 }

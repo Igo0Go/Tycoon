@@ -20,7 +20,9 @@ public class Employee
     public float BaseSalary => baseSalary;
     public float OvertimeSalaryMultiplier => overtimeSalaryMultiplier;
     public float HospitalSalaryMultiplier => hospitalSalaryMultiplier;
+
     public string State => status.StateName;
+
     public bool IsActive => workTime && status.IsActive;
     private bool workTime;
 
@@ -31,6 +33,10 @@ public class Employee
     public float GetSalary()
     {
         return (float)Math.Round(status.CalculateSalary(this), 2);
+    }
+    public string GetSalaryInfo()
+    {
+        return status.GetSalaryInfo(this);
     }
 
     public void SetBaseSalaryStatus()

@@ -29,6 +29,8 @@ public class ResourcePanel : MonoBehaviour
     [SerializeField]
     private Transform employeeListContentContainer;
     [SerializeField]
+    private GameObject currentEmployeeInfoPanel;
+    [SerializeField]
     private TMP_Text nameText;
     [SerializeField]
     private TMP_Text stateText;
@@ -41,15 +43,29 @@ public class ResourcePanel : MonoBehaviour
 
     private FinanceSystem financeSystem;
     private EmployeeSystem employeeSystem;
-    private Employee currentEmployee;
+
+    private Employee CurrentEmployee
+    {
+        get
+        {
+            return _currentEmployee;
+        }
+        set
+        {
+            _currentEmployee = value;
+            currentEmployeeInfoPanel.SetActive(_currentEmployee != null);
+        }
+    }
+    private Employee _currentEmployee;
 
     public void SubscribeEvents(FinanceSystem financeSystem, EmployeeSystem employeeSystem)
     {
         this.financeSystem = financeSystem;
         financeSystem.currentSummChanged += OnCurrentSumChanged;
         this.employeeSystem = employeeSystem;
-        employeeSystem.teamChanged += OnEmployeesChanged;
+        employeeSystem.teamChanged += RedrawEmployeesStatsPanel;
         employeeSystem.teamChanged += RebuildEmployeesList;
+        employeeSystem.teamChanged += (e)=> RedrawFinanceInfo();
     }
     public void SetUp()
     {
@@ -62,7 +78,7 @@ public class ResourcePanel : MonoBehaviour
         RedrawFinanceInfo();
     }
 
-    public void OnEmployeesChanged(List<Employee> employees)
+    public void RedrawEmployeesStatsPanel(List<Employee> employees)
     {
         int allCount = employees.Count;
         int activeCount = 0;
@@ -86,7 +102,35 @@ public class ResourcePanel : MonoBehaviour
     }
     public void CloseResourcePanel()
     {
+        CurrentEmployee = null;
         resurcePanel.SetActive(false);
+    }
+    public void DissmissCurrentEmployee()
+    {
+        employeeSystem.DismissEmployee(CurrentEmployee);
+        CurrentEmployee = null;
+    }
+
+    public void PlusSalaryForCurrentEmployee()
+    {
+        CurrentEmployee.PlusSalary(1);
+    }
+    public void MinusSalaryForCurrentEmployee()
+    {
+        CurrentEmployee.MinusSalary(1);
+    }
+    private void SelectEmployee(Employee e)
+    {
+        if(CurrentEmployee != e)
+        {
+            if(CurrentEmployee != null)
+            {
+                CurrentEmployee.employeeChanged -= RedrawCurrentEmployeeInfo;
+            }
+            CurrentEmployee = e;
+            e.employeeChanged += RedrawCurrentEmployeeInfo;
+            RedrawCurrentEmployeeInfo();
+        }
     }
 
     private void RebuildEmployeesList(List<Employee> employees)
@@ -102,20 +146,12 @@ public class ResourcePanel : MonoBehaviour
             item.OnEmployeeClick += SelectEmployee;
         }
     }
-
-    private void SelectEmployee(Employee e)
-    {
-        currentEmployee = e;
-        RedrawCurrentEmployeeInfo();
-    }
-
     private void RedrawCurrentEmployeeInfo()
     {
-        nameText.text = currentEmployee.Name;
-        stateText.text = currentEmployee.State;
-        paymentText.text = currentEmployee.GetSalary().ToString() + "/Ä";
+        nameText.text = CurrentEmployee.Name;
+        stateText.text = CurrentEmployee.State;
+        paymentText.text = CurrentEmployee.GetSalaryInfo();
     }
-
     private void RedrawFinanceInfo()
     {
         int dayPrediction = (int)Math.Ceiling(financeSystem.CurrentSum / financeSystem.CurrentDayCost);
