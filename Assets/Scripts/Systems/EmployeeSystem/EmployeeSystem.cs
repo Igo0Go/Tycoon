@@ -7,7 +7,18 @@ public class EmployeeSystem : MonoBehaviour
     [SerializeField]
     private EmployeeTeam team;
 
-    private List<Employee> employees;
+    public List<Employee> Employees
+    {
+        get
+        {
+            if(_employees == null)
+            {
+                _employees = team.GetEmployees();
+            }
+            return _employees;
+        }
+    }
+        private List<Employee> _employees;
 
     public event Action<List<Employee>> teamChanged;
 
@@ -15,29 +26,38 @@ public class EmployeeSystem : MonoBehaviour
     {
         timeSystem.endDay += AllGoHome;
         timeSystem.startWork += AllToWork;
-        teamChanged?.Invoke(employees);
+        teamChanged?.Invoke(Employees);
+
+        foreach (Employee e in Employees)
+        {
+            e.employeeChanged += OnEmployeeChanged;
+        }
     }
     public void SetUp()
     {
-        employees = team.GetEmployees();
-        employees[0].SetHospitalSalaryStatus();
-        teamChanged?.Invoke(employees);
+        Employees[0].SetHospitalSalaryStatus();
+        teamChanged?.Invoke(Employees);
     }
 
     private void AllToWork()
     {
-        foreach (Employee e in employees)
+        foreach (Employee e in Employees)
         {
             e.ToWork();
         }
-        teamChanged?.Invoke(employees);
+        teamChanged?.Invoke(Employees);
     }
     private void AllGoHome()
     {
-        foreach (Employee e in employees)
+        foreach (Employee e in Employees)
         {
             e.GoHome();
         }
-        teamChanged?.Invoke(employees);
+        teamChanged?.Invoke(Employees);
+    }
+
+    private void OnEmployeeChanged()
+    {
+        teamChanged?.Invoke(Employees);
     }
 }

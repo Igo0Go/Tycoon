@@ -4,16 +4,16 @@ using UnityEngine;
 public class FinanceSystem : MonoBehaviour
 {
     [SerializeField]
-    private int currentSum;
+    private float currentSum;
     [SerializeField, Min(1)]
-    private int dayRentCost = 500;
+    private float dayRentCost = 500;
     [SerializeField, Min(1)]
-    private int dayUtilityCosts = 25;
+    private float dayUtilityCosts = 25;
     [SerializeField, TextArea(5, 10)]
     private string financeLostText;
 
 
-    public int CurrentSum
+    public float CurrentSum
     {
         get
         {
@@ -31,27 +31,44 @@ public class FinanceSystem : MonoBehaviour
             currentSummChanged?.Invoke(currentSum);
         }
     }
-    public int DayRentCosts => dayRentCost;
-    public int DayUtilityCosts => dayUtilityCosts;
-    public int DayEmployesPayment => 0;
+    public float CurrentDayCost => DayRentCosts + DayUtilityCosts + DayEmployesPayment;
+    public float DayRentCosts => dayRentCost;
+    public float DayUtilityCosts => dayUtilityCosts;
+    public float DayEmployesPayment
+    {
+        get
+        {
+            float employeesPaymentSum = 0;
 
-    public event Action<int> currentSummChanged;
+            foreach (Employee e in employeeSystem.Employees)
+            {
+                employeesPaymentSum += e.GetSalary();
+            }
+
+            return employeesPaymentSum;
+        }
+    }
+
+    public event Action<float> currentSummChanged;
     public event Action financeLost;
+
+    private EmployeeSystem employeeSystem;
 
     public void SetUp()
     {
         currentSummChanged?.Invoke(currentSum);
     }
 
-    public void SubscribeEvents(TimeSystem timeSystem)
+    public void SubscribeEvents(TimeSystem timeSystem, EmployeeSystem employeeSystem)
     {
         timeSystem.endDay += OnDayEnded;
+        this.employeeSystem = employeeSystem;
     }
 
     private void OnDayEnded()
     {
         GameUICenter.messageQueue.PrepareMessage("Ваш чек", "За аренду помещения и сопуствующие услуги требуется заплатить " + 
-            (dayRentCost + dayUtilityCosts).ToString());
-        CurrentSum -= (dayRentCost + dayUtilityCosts);
+            CurrentDayCost.ToString());
+        CurrentSum -= CurrentDayCost;
     }
 }

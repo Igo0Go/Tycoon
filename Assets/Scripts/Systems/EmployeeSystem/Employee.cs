@@ -26,6 +26,8 @@ public class Employee
 
     private SalaryStatus status = SalaryStatusSingleton.baseSalaryStatus;
 
+    public event Action employeeChanged;
+
     public float GetSalary()
     {
         return (float)Math.Round(status.CalculateSalary(this), 2);
@@ -47,9 +49,21 @@ public class Employee
     public void ToWork()
     {
         workTime = true;
+        employeeChanged?.Invoke();
     }
     public void GoHome()
     {
         workTime = false;
+        employeeChanged?.Invoke();
+    }
+    public void PlusSalary(float value)
+    {
+        baseSalary += value;
+        employeeChanged?.Invoke();
+    }
+    public void MinusSalary(float value)
+    {
+        baseSalary -= value;
+        employeeChanged?.Invoke();
     }
 }

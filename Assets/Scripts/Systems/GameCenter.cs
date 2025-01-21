@@ -23,12 +23,13 @@ public class GameCenter : MonoBehaviour
         mainGameplayPanel.SetUp();
 
 
-        financeSystem.SubscribeEvents(timeSystem);
+        financeSystem.SubscribeEvents(timeSystem, employeeSystem);
         employeeSystem.SubscribeEvents(timeSystem);
         resourcePanel.SubscribeEvents(financeSystem, employeeSystem);
 
         financeSystem.SetUp();
         employeeSystem.SetUp();
+        resourcePanel.SetUp();
         timeSystem.SetUp();
     }
 }
