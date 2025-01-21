@@ -780,6 +780,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8b3adddb15c3d64db7ad74bbdfc6244, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  panelObject: {fileID: 1884291002}
   hoursInputField: {fileID: 2114474404}
   minutesInputField: {fileID: 635173321}
   okButton: {fileID: 1455985883}
@@ -2428,9 +2429,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1924787735}
-        m_TargetAssemblyTypeName: MainGameplayPanel, Assembly-CSharp
-        m_MethodName: ShowSkipPanel
+      - m_Target: {fileID: 139323918}
+        m_TargetAssemblyTypeName: TimeSkipPanel, Assembly-CSharp
+        m_MethodName: ShowPanel
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -11215,8 +11216,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7acb325b3c3a90441ac3aaec354f10cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  skipTimePanel: {fileID: 139323918}
-  messagePanel: {fileID: 1286487264}
 --- !u!1 &1931658489
 GameObject:
   m_ObjectHideFlags: 0

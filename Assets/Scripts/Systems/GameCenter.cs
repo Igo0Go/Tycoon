@@ -7,7 +7,6 @@ public class GameCenter : MonoBehaviour
         TimeSystem timeSystem = FindObjectOfType<TimeSystem>();
         FinanceSystem financeSystem = FindObjectOfType<FinanceSystem>();
 
-        MainGameplayPanel mainGameplayPanel = FindObjectOfType<MainGameplayPanel>();
         TimerDisplay timerDisplay = FindObjectOfType<TimerDisplay>();
         TimeSkipPanel timeSkipPanel = FindObjectOfType<TimeSkipPanel>();
         MessagePanel messagePanel = FindObjectOfType<MessagePanel>();
@@ -20,8 +19,6 @@ public class GameCenter : MonoBehaviour
         messageQueue.SubscribeEvents(messagePanel);
         timeSkipPanel.SubscribeEvents(timeSystem);
         timerDisplay.SubscribeEvents(timeSystem);
-        mainGameplayPanel.SetUp();
-
 
         financeSystem.SubscribeEvents(timeSystem, employeeSystem);
         employeeSystem.SubscribeEvents(timeSystem);
@@ -30,6 +27,12 @@ public class GameCenter : MonoBehaviour
         financeSystem.SetUp();
         employeeSystem.SetUp();
         resourcePanel.SetUp();
+        timeSkipPanel.SetUp();
         timeSystem.SetUp();
     }
+}
+
+public static class GameUICenter
+{
+    public static MessageQueue messageQueue;
 }

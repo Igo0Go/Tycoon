@@ -5,6 +5,8 @@ using UnityEngine.UI;
 public class TimeSkipPanel : MonoBehaviour
 {
     [SerializeField]
+    private GameObject panelObject;
+    [SerializeField]
     private TMP_InputField hoursInputField;
     [SerializeField]
     private TMP_InputField minutesInputField;
@@ -25,13 +27,20 @@ public class TimeSkipPanel : MonoBehaviour
         hoursInputField.onEndEdit.AddListener(OnInputFieldEndEdit);
         minutesInputField.onEndEdit.AddListener(OnInputFieldEndEdit);
     }
-
-    public void SetUpPanel()
+    public void SetUp()
     {
         hoursInputField.text = (timeSystem.CurrentHour + 1).ToString();
         minutesInputField.text = timeSystem.CurrentMinute.ToString();
         OnInputFieldEndEdit(string.Empty);
+        panelObject.SetActive(false);
     }
+    public void ShowPanel()
+    {
+        panelObject.SetActive(true);
+        SetHourTextForSkipPanel(timeSystem.CurrentHour);
+        SetMinuteTextForSkipPanel(timeSystem.CurrentMinute);
+    }
+
     public void PlusHour()
     {
         currentHour++;
@@ -60,6 +69,7 @@ public class TimeSkipPanel : MonoBehaviour
     {
         timeSystem.CurrentHour = currentHour;
         timeSystem.CurrentMinute = currentMinute;
+        panelObject.SetActive(false);
     }
 
     private void SetHourTextForSkipPanel(int hours)
