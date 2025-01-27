@@ -24,6 +24,7 @@ public class GameCenter : MonoBehaviour
         employeeSystem.SubscribeEvents(timeSystem);
         resourcePanel.SubscribeEvents(financeSystem, employeeSystem);
 
+        timerDisplay.SetUp();
         financeSystem.SetUp();
         employeeSystem.SetUp();
         resourcePanel.SetUp();

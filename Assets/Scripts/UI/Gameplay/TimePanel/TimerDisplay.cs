@@ -10,8 +10,15 @@ public class TimerDisplay : MonoBehaviour
     private TMP_Text dayPartText;
     [SerializeField]
     private TMP_Text dateText;
+    [SerializeField]
+    private GameObject goHomeButton;
 
     private TimeSystem timeSystem;
+
+    public void SetUp()
+    {
+        goHomeButton.SetActive(false);
+    }
 
     public void SubscribeEvents(TimeSystem timeSystem)
     {
@@ -21,6 +28,7 @@ public class TimerDisplay : MonoBehaviour
         timeSystem.startWork += ()=> OnDayPartChanged("Работа");
         timeSystem.startLunch += () => OnDayPartChanged("Обед");
         timeSystem.endWork += () => OnDayPartChanged("Отдых");
+        timeSystem.startOvertime += OnStartOvertime;
         timeSystem.dateChanged += OnDateChanged;
     }
 
@@ -53,5 +61,16 @@ public class TimerDisplay : MonoBehaviour
     private void OnDateChanged(DateTime date)
     {
         dateText.text = date.Day + "." + date.Month + "." + date.Year;
+    }
+
+    private void OnStartOvertime()
+    {
+        goHomeButton.SetActive(true);
+    }
+
+    public void OnGoHomeButtonClick()
+    {
+        timeSystem.StartNewDay();
+        goHomeButton.SetActive(false);
     }
 }

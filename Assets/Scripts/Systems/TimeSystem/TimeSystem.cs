@@ -35,6 +35,7 @@ public class TimeSystem : MonoBehaviour
     public event Action startWork;
     public event Action startLunch;
     public event Action endWork;
+    public event Action startOvertime;
     public event Action endDay;
 
     public int CurrentHour
@@ -170,7 +171,7 @@ public class TimeSystem : MonoBehaviour
             {
                 currentDayPart = DayPart.HomeTime;
                 endWork?.Invoke();
-                GameUICenter.messageQueue.PrepareMessage("Пока-пока!", endWorkMessage, StartNewDay, () => { });
+                GameUICenter.messageQueue.PrepareMessage("Пока-пока!", endWorkMessage, StartNewDay, () => { startOvertime?.Invoke(); });
             }
         }
         else if (CurrentHour >= endDayHour || CurrentHour < startDayHour)
