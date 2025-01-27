@@ -35,7 +35,6 @@ public class EmployeeSystem : MonoBehaviour
     }
     public void SetUp()
     {
-        Employees[0].SetHospitalSalaryStatus();
         Employees[2].SetOvertimeSalaryStatus();
         teamChanged?.Invoke(Employees);
     }

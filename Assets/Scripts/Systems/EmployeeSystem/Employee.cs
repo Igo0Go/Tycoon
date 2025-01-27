@@ -30,6 +30,14 @@ public class Employee
 
     public event Action employeeChanged;
 
+    public Employee(string name, float baseSalary, float overtimeSalaryMultiplier, float hospitalSalaryMultiplier)
+    {
+        this.name = name;
+        this.baseSalary = baseSalary;
+        this.overtimeSalaryMultiplier = overtimeSalaryMultiplier;
+        this.hospitalSalaryMultiplier = hospitalSalaryMultiplier;
+    }
+
     public float GetSalary()
     {
         return (float)Math.Round(status.CalculateSalary(this), 2);
