@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class MessagePanel : MonoBehaviour
 {
+    public event Action okEvent;
     public event Action yesEvent;
     public event Action noEvent;
 
@@ -37,7 +38,7 @@ public class MessagePanel : MonoBehaviour
     {
         if(info.yesAction == null)
         {
-            ShowMessage(info.Header, info.Message);
+            ShowMessage(info.Header, info.Message, info.okAction);
         }
         else
         {
@@ -45,9 +46,10 @@ public class MessagePanel : MonoBehaviour
         }
     }
 
-    private void ShowMessage(string header, string message)
+    private void ShowMessage(string header, string message, Action okAction)
     {
         HideAll();
+        okEvent += okAction;
         panel.SetActive(true);
         headerText.text = header;
         messageText.text = message;
@@ -73,8 +75,11 @@ public class MessagePanel : MonoBehaviour
         noButton.gameObject.SetActive(false);
         panel.SetActive(false);
     }
+
     private void OnOkButtonClick()
     {
+        okEvent?.Invoke();
+        okEvent = null;
         messageHiden?.Invoke();
     }
     private void OnYesButtonClick()

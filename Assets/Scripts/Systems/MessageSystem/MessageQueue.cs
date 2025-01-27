@@ -18,16 +18,27 @@ public class MessageQueue : MonoBehaviour
 
     public void PrepareMessage(string header, string message)
     {
-        PrepareMessage(header, message, null, null);
+        PrepareMessage(header, message, null, null, null);
+    }
+
+    public void PrepareMessage(string header, string message, Action okAction)
+    {
+        PrepareMessage(header, message, null, null, okAction);
     }
 
     public void PrepareMessage(string header, string message, Action yesAction, Action noAction)
+    {
+        PrepareMessage(header, message, yesAction, noAction, null);
+    }
+
+    public void PrepareMessage(string header, string message, Action yesAction, Action noAction, Action okAction)
     {
         MessageInfo info = new MessageInfo();
         info.Header = header;
         info.Message = message;
         info.yesAction = yesAction;
         info.noAction = noAction;
+        info.okAction = okAction;
         messages.Add(info);
         CheckMesageQueue();
     }

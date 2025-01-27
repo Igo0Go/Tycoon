@@ -6,4 +6,5 @@ public class MessageInfo
     public string Message;
     public Action yesAction;
     public Action noAction;
+    public Action okAction;
 }

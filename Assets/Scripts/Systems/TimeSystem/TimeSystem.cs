@@ -6,20 +6,36 @@ public class TimeSystem : MonoBehaviour
     [SerializeField, Range(1, 1000)]
     private float timeSpeed = 1;
 
-    [SerializeField, TextArea(5, 10)]
-    private string lunchMessage;
+    [Space(20)]
     [SerializeField, TextArea(5, 10)]
     private string startDayMessage;
     [SerializeField, TextArea(5, 10)]
+    private string lunchMessage;
+    [SerializeField, TextArea(5, 10)]
+    private string endWorkMessage;
+    [SerializeField, TextArea(5, 10)]
     private string endDayMessage;
+
+    [Space(20)]
+    [SerializeField]
+    private int startDayHour = 9;
+    [SerializeField]
+    private int startLunchHour = 13;
+    [SerializeField]
+    private int endLunchHour = 14;
+    [SerializeField]
+    private int endWorkDayHour = 18;
+    [SerializeField]
+    private int endDayHour = 0;
 
     public event Action<int> hoursChanged;
     public event Action<int> minutesChanged;
     public event Action<DateTime> dateChanged;
-    public event Action startLunch;
-    public event Action startWork;
-    public event Action endDay;
 
+    public event Action startWork;
+    public event Action startLunch;
+    public event Action endWork;
+    public event Action endDay;
 
     public int CurrentHour
     {
@@ -77,10 +93,6 @@ public class TimeSystem : MonoBehaviour
 
     public const int cycle = 60;
     public const int hourCycle = 24;
-    private const int startDayHour = 9;
-    private const int endDayHour = 18;
-    private const int startLunchHour = 13;
-    private const int endLunchHour = 14;
 
     private DayPart currentDayPart;
     private bool useTime;
@@ -135,7 +147,7 @@ public class TimeSystem : MonoBehaviour
     private void CheckDatePart()
     {
         if ((CurrentHour >= startDayHour && CurrentHour < startLunchHour) ||
-            (CurrentHour >= endLunchHour && CurrentHour < endDayHour))
+            (CurrentHour >= endLunchHour && CurrentHour < endWorkDayHour))
         {
             if(currentDayPart != DayPart.Work)
             {
@@ -152,14 +164,20 @@ public class TimeSystem : MonoBehaviour
                 GameUICenter.messageQueue.PrepareMessage("На обед!", lunchMessage, SkipLunch, () => { });
             }
         }
-        else if (CurrentHour >= endDayHour || CurrentHour < startDayHour)
+        else if (CurrentHour >= endWorkDayHour || CurrentHour < endDayHour)
         {
             if(currentDayPart != DayPart.HomeTime)
             {
                 currentDayPart = DayPart.HomeTime;
-                endDay?.Invoke();
-                GameUICenter.messageQueue.PrepareMessage("Пока-пока!", endDayMessage, StartNewDay, () => { });
+                endWork?.Invoke();
+                GameUICenter.messageQueue.PrepareMessage("Пока-пока!", endWorkMessage, StartNewDay, () => { });
             }
+        }
+        else if (CurrentHour >= endDayHour || CurrentHour < startDayHour)
+        {
+            currentDayPart = DayPart.HomeTime;
+            endDay?.Invoke();
+            GameUICenter.messageQueue.PrepareMessage("Вы что-то заседелись", endDayMessage, StartNewDay);
         }
     }
 }

@@ -20,7 +20,7 @@ public class TimerDisplay : MonoBehaviour
         timeSystem.minutesChanged += OnMinutesChanged;
         timeSystem.startWork += ()=> OnDayPartChanged("Работа");
         timeSystem.startLunch += () => OnDayPartChanged("Обед");
-        timeSystem.endDay += () => OnDayPartChanged("Отдых");
+        timeSystem.endWork += () => OnDayPartChanged("Отдых");
         timeSystem.dateChanged += OnDateChanged;
     }
 

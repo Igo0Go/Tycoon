@@ -24,7 +24,7 @@ public class EmployeeSystem : MonoBehaviour
 
     public void SubscribeEvents(TimeSystem timeSystem)
     {
-        timeSystem.endDay += AllGoHome;
+        timeSystem.endWork += AllGoHome;
         timeSystem.startWork += AllToWork;
         teamChanged?.Invoke(Employees);
 
