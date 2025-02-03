@@ -1,6 +1,7 @@
 public interface SalaryStatus
 {
     bool IsActive { get; }
+    bool Overtime { get; }
     string StateName { get; }
     string GetSalaryInfo(Employee employee);
     float CalculateSalary(Employee employee);
@@ -16,6 +17,7 @@ public static class SalaryStatusSingleton
 public class BaseSalaryStatus : SalaryStatus
 {
     public bool IsActive => true;
+    public bool Overtime => false;
     public string StateName => "Работает";
     public float CalculateSalary(Employee employee)
     {
@@ -29,6 +31,7 @@ public class BaseSalaryStatus : SalaryStatus
 public class HospitalSalaryStatus : SalaryStatus
 {
     public bool IsActive => false;
+    public bool Overtime => false;
     public string StateName => "На больничном";
     public float CalculateSalary(Employee employee)
     {
@@ -43,6 +46,7 @@ public class HospitalSalaryStatus : SalaryStatus
 public class OvertimeSalaryStatus : SalaryStatus
 {
     public bool IsActive => true;
+    public bool Overtime => true;
     public string StateName => "Сверхурочно";
     public float CalculateSalary(Employee employee)
     {

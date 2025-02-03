@@ -21,8 +21,20 @@ public class Employee
     public float OvertimeSalaryMultiplier => overtimeSalaryMultiplier;
     public float HospitalSalaryMultiplier => hospitalSalaryMultiplier;
 
-    public string State => status.StateName;
+    public string State
+    {
+        get
+        {
+            if (!OverTime && !workTime)
+            {
+                return "Дома";
+            }
 
+            return status.StateName;
+        }
+    }
+
+    public bool OverTime => status.Overtime;
     public bool IsActive => workTime && status.IsActive;
     private bool workTime;
 
@@ -50,14 +62,17 @@ public class Employee
     public void SetBaseSalaryStatus()
     {
         status = SalaryStatusSingleton.baseSalaryStatus;
+        employeeChanged?.Invoke();
     }
     public void SetHospitalSalaryStatus()
     {
         status = SalaryStatusSingleton.hospitalSalaryStatus;
+        employeeChanged?.Invoke();
     }
     public void SetOvertimeSalaryStatus()
     {
         status = SalaryStatusSingleton.overtimeSalaryStatus;
+        employeeChanged?.Invoke();
     }
 
     public void ToWork()
@@ -65,7 +80,7 @@ public class Employee
         workTime = true;
         employeeChanged?.Invoke();
     }
-    public void GoHome()
+    public void StopWorkTime()
     {
         workTime = false;
         employeeChanged?.Invoke();

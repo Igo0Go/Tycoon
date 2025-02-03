@@ -24,8 +24,11 @@ public class EmployeeSystem : MonoBehaviour
 
     public void SubscribeEvents(TimeSystem timeSystem)
     {
-        timeSystem.endWork += AllGoHome;
+        timeSystem.startNewDay += AllToBaseState;
         timeSystem.startWork += AllToWork;
+        timeSystem.endWork += AllEndWork;
+        timeSystem.endDay += AllGoHome;
+
         teamChanged?.Invoke(Employees);
 
         foreach (Employee e in Employees)
@@ -45,6 +48,14 @@ public class EmployeeSystem : MonoBehaviour
         teamChanged?.Invoke(Employees);
     }
 
+    private void AllToBaseState()
+    {
+        foreach (Employee e in Employees)
+        {
+            e.SetBaseSalaryStatus();
+        }
+        teamChanged?.Invoke(Employees);
+    }
     private void AllToWork()
     {
         foreach (Employee e in Employees)
@@ -53,11 +64,21 @@ public class EmployeeSystem : MonoBehaviour
         }
         teamChanged?.Invoke(Employees);
     }
+    private void AllEndWork()
+    {
+        foreach (Employee e in Employees)
+        {
+            if(!e.OverTime)
+                e.StopWorkTime();
+        }
+        teamChanged?.Invoke(Employees);
+    }
     private void AllGoHome()
     {
         foreach (Employee e in Employees)
         {
-            e.GoHome();
+            e.SetBaseSalaryStatus();
+            e.StopWorkTime();
         }
         teamChanged?.Invoke(Employees);
     }

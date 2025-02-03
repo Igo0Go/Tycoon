@@ -15,6 +15,8 @@ public class TimeSystem : MonoBehaviour
     private string endWorkMessage;
     [SerializeField, TextArea(5, 10)]
     private string endDayMessage;
+    [SerializeField, TextArea(5, 10)]
+    private string overtimePrepareMessage;
 
     [Space(20)]
     [SerializeField]
@@ -32,9 +34,11 @@ public class TimeSystem : MonoBehaviour
     public event Action<int> minutesChanged;
     public event Action<DateTime> dateChanged;
 
+    public event Action startNewDay;
     public event Action startWork;
-    public event Action startLunch;
     public event Action endWork;
+    public event Action startLunch;
+    public event Action overtimeAccepted;
     public event Action startOvertime;
     public event Action endDay;
 
@@ -95,6 +99,8 @@ public class TimeSystem : MonoBehaviour
     public const int cycle = 60;
     public const int hourCycle = 24;
 
+    private const int prepareOvertimeHour = 17;
+
     private DayPart currentDayPart;
     private bool useTime;
     private float t = 0;
@@ -125,6 +131,7 @@ public class TimeSystem : MonoBehaviour
         CurrentHour = 9;
         CurrentMinute = 0;
         useTime = true;
+        startNewDay?.Invoke();
         startWork?.Invoke();
 
         if(CurrentDate.DayOfWeek == DayOfWeek.Friday)
@@ -165,7 +172,12 @@ public class TimeSystem : MonoBehaviour
                 GameUICenter.messageQueue.PrepareMessage("На обед!", lunchMessage, SkipLunch, () => { });
             }
         }
-        else if (CurrentHour >= endWorkDayHour || CurrentHour < endDayHour)
+
+        if (CurrentHour >= prepareOvertimeHour && CurrentHour < endWorkDayHour)
+        {
+            GameUICenter.messageQueue.PrepareMessage("Успеваем?", overtimePrepareMessage, () => { overtimeAccepted?.Invoke(); }, null);
+        }
+        else if (CurrentHour >= endWorkDayHour)
         {
             if(currentDayPart != DayPart.HomeTime)
             {
@@ -174,7 +186,7 @@ public class TimeSystem : MonoBehaviour
                 GameUICenter.messageQueue.PrepareMessage("Пока-пока!", endWorkMessage, StartNewDay, () => { startOvertime?.Invoke(); });
             }
         }
-        else if (CurrentHour >= endDayHour || CurrentHour < startDayHour)
+        else if (CurrentHour >= endDayHour && CurrentHour < startDayHour)
         {
             currentDayPart = DayPart.HomeTime;
             endDay?.Invoke();

@@ -1,41 +1,47 @@
 using TMPro;
 using UnityEngine;
-using System;
 
-public class EmployeeUiItem : MonoBehaviour
+public class EmployeeOvertimeItem : MonoBehaviour
 {
     [SerializeField]
     private TMP_Text nameText;
     [SerializeField]
-    private TMP_Text stateText;
-    [SerializeField]
     private TMP_Text paymentText;
+    [SerializeField]
+    private GameObject onMarker;
+    [SerializeField]
+    private GameObject offMarker;
 
     private Employee emp;
-
-    public event Action<Employee> OnEmployeeClick;
-
     public void Init(Employee employee)
     {
         emp = employee;
-        emp.employeeChanged += UpdateInfo;
         UpdateInfo();
+        emp.employeeChanged += UpdateInfo;
     }
     public void OnDestroy()
     {
         emp.employeeChanged -= UpdateInfo;
     }
 
-
     public void OnClick()
     {
-        OnEmployeeClick?.Invoke(emp);
+        if(emp.OverTime)
+        {
+            emp.SetBaseSalaryStatus();
+        }
+        else
+        {
+            emp.SetOvertimeSalaryStatus();
+        }
+        UpdateInfo();
     }
 
     private void UpdateInfo()
     {
         nameText.text = emp.Name;
-        stateText.text = emp.State;
         paymentText.text = emp.GetSalaryInfo();
+        onMarker.SetActive(emp.OverTime);
+        offMarker.SetActive(!emp.OverTime);
     }
 }

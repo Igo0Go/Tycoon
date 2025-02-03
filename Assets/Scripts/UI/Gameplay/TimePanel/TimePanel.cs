@@ -2,7 +2,7 @@ using System;
 using TMPro;
 using UnityEngine;
 
-public class TimerDisplay : MonoBehaviour
+public class TimePanel : MonoBehaviour
 {
     [SerializeField]
     private TMP_Text timerText;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class ResourcePanel : MonoBehaviour
+public class ResourcePanel : MonoBehaviour, IUIPanel
 {
     [Header("Маля панель")]
     [SerializeField]
@@ -69,7 +69,7 @@ public class ResourcePanel : MonoBehaviour
     }
     public void SetUp()
     {
-        CloseResourcePanel();
+        HidePanel();
     }
 
     public void OnCurrentSumChanged(float newSum)
@@ -94,17 +94,6 @@ public class ResourcePanel : MonoBehaviour
         currentEmployeeText.text = activeCount + "/" + allCount;
     }
 
-    public void ShowResourcePanel()
-    {
-        resurcePanel.SetActive(true);
-        RedrawFinanceInfo();
-        RebuildEmployeesList(employeeSystem.Employees);
-    }
-    public void CloseResourcePanel()
-    {
-        CurrentEmployee = null;
-        resurcePanel.SetActive(false);
-    }
     public void DissmissCurrentEmployee()
     {
         employeeSystem.DismissEmployee(CurrentEmployee);
@@ -133,12 +122,18 @@ public class ResourcePanel : MonoBehaviour
         }
     }
 
-    private void RebuildEmployeesList(List<Employee> employees)
+    private void ClearEmployeeList()
     {
         for (int i = 0; i < employeeListContentContainer.childCount; i++)
         {
-            Destroy(employeeListContentContainer.GetChild(i).gameObject);
+            EmployeeUiItem item = employeeListContentContainer.GetChild(i).gameObject.GetComponent<EmployeeUiItem>();
+            item.OnDestroy();
+            Destroy(item.gameObject);
         }
+    }
+    private void RebuildEmployeesList(List<Employee> employees)
+    {
+        ClearEmployeeList();
         foreach (Employee e in employees)
         {
             EmployeeUiItem item = Instantiate(employeeUIItemPrefab, employeeListContentContainer).GetComponent<EmployeeUiItem>();
@@ -160,5 +155,19 @@ public class ResourcePanel : MonoBehaviour
         rentText.text = "Аренда помещения: -" + financeSystem.DayRentCosts + "/Д";
         utilityText.text = "Коммунальные услуги: -" + financeSystem.DayUtilityCosts + "/Д";
         employeesPaymentText.text = "Оплата работы сотрудников: -" + financeSystem.DayEmployesPayment + "/Д";
+    }
+
+    public void ShowPanel()
+    {
+        resurcePanel.SetActive(true);
+        RedrawFinanceInfo();
+        RebuildEmployeesList(employeeSystem.Employees);
+    }
+
+    public void HidePanel()
+    {
+        CurrentEmployee = null;
+        ClearEmployeeList();
+        resurcePanel.SetActive(false);
     }
 }

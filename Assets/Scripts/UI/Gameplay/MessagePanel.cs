@@ -36,7 +36,7 @@ public class MessagePanel : MonoBehaviour
 
     public void ShowMessage(MessageInfo info)
     {
-        if(info.yesAction == null)
+        if(info.yesAction == null && info.noAction == null)
         {
             ShowMessage(info.Header, info.Message, info.okAction);
         }

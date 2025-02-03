@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TimeSkipPanel : MonoBehaviour
+public class TimeSkipPanel : MonoBehaviour, IUIPanel
 {
     [SerializeField]
     private GameObject panelObject;
@@ -40,6 +40,10 @@ public class TimeSkipPanel : MonoBehaviour
         SetHourTextForSkipPanel(timeSystem.CurrentHour);
         SetMinuteTextForSkipPanel(timeSystem.CurrentMinute);
     }
+    public void HidePanel()
+    {
+        panelObject.SetActive(false);
+    }
 
     public void PlusHour()
     {
@@ -67,6 +71,8 @@ public class TimeSkipPanel : MonoBehaviour
     }
     public void SkipTime()
     {
+        currentHour = Mathf.Clamp(int.Parse(hoursInputField.text), 0, TimeSystem.hourCycle - 1);
+        currentMinute = Mathf.Clamp(int.Parse(minutesInputField.text), 0, TimeSystem.cycle - 1);
         timeSystem.CurrentHour = currentHour;
         timeSystem.CurrentMinute = currentMinute;
         panelObject.SetActive(false);

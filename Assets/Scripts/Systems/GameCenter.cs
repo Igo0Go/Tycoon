@@ -7,12 +7,13 @@ public class GameCenter : MonoBehaviour
         TimeSystem timeSystem = FindObjectOfType<TimeSystem>();
         FinanceSystem financeSystem = FindObjectOfType<FinanceSystem>();
 
-        TimerDisplay timerDisplay = FindObjectOfType<TimerDisplay>();
+        TimePanel timerDisplay = FindObjectOfType<TimePanel>();
         TimeSkipPanel timeSkipPanel = FindObjectOfType<TimeSkipPanel>();
         MessagePanel messagePanel = FindObjectOfType<MessagePanel>();
         ResourcePanel resourcePanel = FindObjectOfType<ResourcePanel>();
         MessageQueue messageQueue = FindObjectOfType<MessageQueue>();
         EmployeeSystem employeeSystem = FindObjectOfType<EmployeeSystem>();
+        OvertimeSelectorPanel overtimeSelectorPanel = FindObjectOfType<OvertimeSelectorPanel>();
 
         GameUICenter.messageQueue = messageQueue;
         messagePanel.SubscribeEvents(messageQueue);
@@ -20,10 +21,12 @@ public class GameCenter : MonoBehaviour
         timeSkipPanel.SubscribeEvents(timeSystem);
         timerDisplay.SubscribeEvents(timeSystem);
 
+        overtimeSelectorPanel.SubscribeEvents(employeeSystem, timeSystem);
         financeSystem.SubscribeEvents(timeSystem, employeeSystem);
         employeeSystem.SubscribeEvents(timeSystem);
         resourcePanel.SubscribeEvents(financeSystem, employeeSystem);
 
+        overtimeSelectorPanel.SetUp();
         timerDisplay.SetUp();
         financeSystem.SetUp();
         employeeSystem.SetUp();
