@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ffdf2261a9e6abf41a915d618e391685, type: 3}
   m_Name: Team
   m_EditorClassIdentifier: 
+  stressMultiplier: 8
+  fatigueMultiplier: 1
   _employees:
   - name: "\u0412\u0438\u043B\u043A\u0430 \u041A\u043E\u043D\u0441\u0442\u0430\u043D\u0442\u0438\u043D"
     baseSalary: 30

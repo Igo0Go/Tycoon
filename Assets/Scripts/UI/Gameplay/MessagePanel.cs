@@ -70,6 +70,9 @@ public class MessagePanel : MonoBehaviour
 
     private void HideAll()
     {
+        yesEvent = null;
+        noEvent = null;
+        okEvent = null;
         okButton.gameObject.SetActive(false);
         yesButton.gameObject.SetActive(false);
         noButton.gameObject.SetActive(false);

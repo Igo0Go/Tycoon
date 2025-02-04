@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ResourcePanel : MonoBehaviour, IUIPanel
 {
@@ -36,6 +37,10 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
     private TMP_Text stateText;
     [SerializeField]
     private TMP_Text paymentText;
+    [SerializeField]
+    private Slider stressSlider;
+    [SerializeField]
+    private Slider fatigueSlider;
 
     [Space]
     [SerializeField]
@@ -69,6 +74,7 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
     }
     public void SetUp()
     {
+        stressSlider.maxValue = fatigueSlider.maxValue = 100;
         HidePanel();
     }
 
@@ -143,9 +149,14 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
     }
     private void RedrawCurrentEmployeeInfo()
     {
-        nameText.text = CurrentEmployee.Name;
-        stateText.text = CurrentEmployee.State;
-        paymentText.text = CurrentEmployee.GetSalaryInfo();
+        if(CurrentEmployee != null)
+        {
+            stressSlider.value = CurrentEmployee.Stress;
+            fatigueSlider.value = CurrentEmployee.Fatigue;
+            nameText.text = CurrentEmployee.Name;
+            stateText.text = CurrentEmployee.State;
+            paymentText.text = CurrentEmployee.GetSalaryInfo();
+        }
     }
     private void RedrawFinanceInfo()
     {

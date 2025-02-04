@@ -7,6 +7,12 @@ public class EmployeeSystem : MonoBehaviour
     [SerializeField]
     private EmployeeTeam team;
 
+    [SerializeField, TextArea(5, 10)]
+    private string employeeMaxStressMessege;
+
+    [SerializeField, TextArea(5, 10)]
+    private string employeeMaxFatigueMessege;
+
     public List<Employee> Employees
     {
         get
@@ -24,7 +30,7 @@ public class EmployeeSystem : MonoBehaviour
 
     public void SubscribeEvents(TimeSystem timeSystem)
     {
-        timeSystem.startNewDay += AllToBaseState;
+        timeSystem.startNewDay += AllStartDay;
         timeSystem.startWork += AllToWork;
         timeSystem.endWork += AllEndWork;
         timeSystem.endDay += AllGoHome;
@@ -34,11 +40,12 @@ public class EmployeeSystem : MonoBehaviour
         foreach (Employee e in Employees)
         {
             e.employeeChanged += OnEmployeeChanged;
+            e.employeeMaxFatigue += OnEmployeeMaxFatigue;
+            e.employeeMaxStress += OnEmployeeMaxStress;
         }
     }
     public void SetUp()
     {
-        Employees[2].SetOvertimeSalaryStatus();
         teamChanged?.Invoke(Employees);
     }
 
@@ -48,11 +55,20 @@ public class EmployeeSystem : MonoBehaviour
         teamChanged?.Invoke(Employees);
     }
 
-    private void AllToBaseState()
+    private void AllStartDay()
     {
-        foreach (Employee e in Employees)
+        for (int i = 0; i < Employees.Count; i++)
         {
-            e.SetBaseSalaryStatus();
+            Employee e = Employees[i];
+            if(e.EmployeeInTheTeam())
+            {
+                e.SetBaseSalaryStatus();
+            }
+            else
+            {
+                DismissEmployee(e);
+                i--;
+            }
         }
         teamChanged?.Invoke(Employees);
     }
@@ -77,6 +93,7 @@ public class EmployeeSystem : MonoBehaviour
     {
         foreach (Employee e in Employees)
         {
+            e.EndDayResult();
             e.SetBaseSalaryStatus();
             e.StopWorkTime();
         }
@@ -86,5 +103,13 @@ public class EmployeeSystem : MonoBehaviour
     private void OnEmployeeChanged()
     {
         teamChanged?.Invoke(Employees);
+    }
+    private void OnEmployeeMaxStress(Employee e)
+    {
+        GameUICenter.messageQueue.PrepareMessage(e.Name + " уволняется", employeeMaxStressMessege);
+    }
+    private void OnEmployeeMaxFatigue(Employee e)
+    {
+        GameUICenter.messageQueue.PrepareMessage(e.Name + " не вышел на работу", employeeMaxFatigueMessege);
     }
 }

@@ -152,6 +152,12 @@ public class TimeSystem : MonoBehaviour
         CurrentHour = endLunchHour;
     }
 
+    public void EndDay()
+    {
+        endDay?.Invoke();
+        StartNewDay();
+    }
+
     private void CheckDatePart()
     {
         if ((CurrentHour >= startDayHour && CurrentHour < startLunchHour) ||
@@ -183,14 +189,14 @@ public class TimeSystem : MonoBehaviour
             {
                 currentDayPart = DayPart.HomeTime;
                 endWork?.Invoke();
-                GameUICenter.messageQueue.PrepareMessage("Пока-пока!", endWorkMessage, StartNewDay, () => { startOvertime?.Invoke(); });
+                GameUICenter.messageQueue.PrepareMessage("Пока-пока!", endWorkMessage, EndDay, () => { startOvertime?.Invoke(); });
             }
         }
         else if (CurrentHour >= endDayHour && CurrentHour < startDayHour)
         {
             currentDayPart = DayPart.HomeTime;
             endDay?.Invoke();
-            GameUICenter.messageQueue.PrepareMessage("Вы что-то заседелись", endDayMessage, StartNewDay);
+            GameUICenter.messageQueue.PrepareMessage("Вы что-то заседелись", endDayMessage, EndDay);
         }
     }
 }

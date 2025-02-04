@@ -70,7 +70,7 @@ public class TimePanel : MonoBehaviour
 
     public void OnGoHomeButtonClick()
     {
-        timeSystem.StartNewDay();
+        timeSystem.EndDay();
         goHomeButton.SetActive(false);
     }
 }

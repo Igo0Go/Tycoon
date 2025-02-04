@@ -5,6 +5,10 @@ using UnityEngine;
 public class EmployeeTeam : ScriptableObject
 {
     [SerializeField]
+    private int stressMultiplier = 1;
+    [SerializeField]
+    private int fatigueMultiplier = 1;
+    [SerializeField]
     private List<EmployeeBuilderInfo> _employees;
     [SerializeField]
     private List<EmployeeBuilderInfo> _recruts;
@@ -15,7 +19,9 @@ public class EmployeeTeam : ScriptableObject
 
         foreach(EmployeeBuilderInfo info in _employees)
         {
-            result.Add(EmployeeBuilder.GetEmployee(info));
+            Employee e = EmployeeBuilder.GetEmployee(info);
+            e.SetCharacteristicMultiplier(stressMultiplier, fatigueMultiplier);
+            result.Add(e);
         }
 
         return result;
