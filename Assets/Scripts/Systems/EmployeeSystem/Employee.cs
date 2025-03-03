@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
@@ -38,6 +39,9 @@ public class Employee
     public bool IsActive => workTime && status.IsActive;
     private bool workTime;
 
+    /// <summary>
+    /// Нервозность сотрудника
+    /// </summary>
     public int Stress
     {
         get
@@ -51,6 +55,10 @@ public class Employee
         }
     }
     private int _stress;
+
+    /// <summary>
+    /// Усталость сотрудника
+    /// </summary>
     public int Fatigue
     {
         get
@@ -72,9 +80,23 @@ public class Employee
 
     private SalaryStatus status = SalaryStatusSingleton.baseSalaryStatus;
 
+    public EmployeeTask CurrentTask
+    {
+        get => _currentTask;
+        set
+        {
+            _currentTask = value;
+            taskChanged?.Invoke();
+        }
+    }
+    private EmployeeTask _currentTask;
+    public Dictionary<EmployeeTaskType, int> employeeTaskSpeed;
+
     public event Action employeeChanged;
     public event Action<Employee> employeeMaxStress;
     public event Action<Employee> employeeMaxFatigue;
+    public event Action doTask;
+    public event Action taskChanged;
 
     public Employee(string name, float baseSalary, float overtimeSalaryMultiplier, float hospitalSalaryMultiplier)
     {
@@ -82,6 +104,11 @@ public class Employee
         this.baseSalary = baseSalary;
         this.overtimeSalaryMultiplier = overtimeSalaryMultiplier;
         this.hospitalSalaryMultiplier = hospitalSalaryMultiplier;
+
+        employeeTaskSpeed = new Dictionary<EmployeeTaskType, int>();
+        employeeTaskSpeed.Add(EmployeeTaskType.Code, 0);
+        employeeTaskSpeed.Add(EmployeeTaskType.Docs, 0);
+        employeeTaskSpeed.Add(EmployeeTaskType.Testing, 0);
     }
 
     public float GetSalary()
@@ -139,6 +166,33 @@ public class Employee
     {
         stressMultiplier = stress;
         fatigueMultiplier = fatigue;
+    }
+
+    public void DoWork()
+    {
+        if(!status.IsActive || !workTime)
+        {
+            return;
+        }
+
+        if(CurrentTask != null)
+        {
+            int workSpeed = 0;
+            if (CurrentTask.Type == EmployeeTaskType.Testing)
+            {
+                workSpeed = EmployeeTask.defaultTaskTestSpeedPerMinute + employeeTaskSpeed[EmployeeTaskType.Testing];
+            }
+            else
+            {
+                workSpeed = EmployeeTask.defaultTaskWorkSpeedPerMinute + employeeTaskSpeed[CurrentTask.Type];
+            }
+            CurrentTask.CompleteTaskTime += workSpeed;
+            doTask?.Invoke();
+        }
+    }
+    public void FatigueLevelUP(int fatiguePoints)
+    {
+        Fatigue += fatiguePoints * fatigueMultiplier;
     }
 
     public void EndDayResult()

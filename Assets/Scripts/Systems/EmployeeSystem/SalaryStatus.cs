@@ -58,3 +58,4 @@ public class OvertimeSalaryStatus : SalaryStatus
         return employee.BaseSalary + " * " + employee.OvertimeSalaryMultiplier + "(сверх.) = " + result + "/Д";
     }
 }
+

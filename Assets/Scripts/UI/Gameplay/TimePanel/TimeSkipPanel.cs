@@ -73,8 +73,7 @@ public class TimeSkipPanel : MonoBehaviour, IUIPanel
     {
         currentHour = Mathf.Clamp(int.Parse(hoursInputField.text), 0, TimeSystem.hourCycle - 1);
         currentMinute = Mathf.Clamp(int.Parse(minutesInputField.text), 0, TimeSystem.cycle - 1);
-        timeSystem.CurrentHour = currentHour;
-        timeSystem.CurrentMinute = currentMinute;
+        timeSystem.SkipTimeToThis(currentHour, currentMinute);
         panelObject.SetActive(false);
     }
 

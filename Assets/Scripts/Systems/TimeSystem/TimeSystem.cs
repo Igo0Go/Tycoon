@@ -33,6 +33,7 @@ public class TimeSystem : MonoBehaviour
     public event Action<int> hoursChanged;
     public event Action<int> minutesChanged;
     public event Action<DateTime> dateChanged;
+    public event Action<int> spendTime;
 
     public event Action startNewDay;
     public event Action startWork;
@@ -118,9 +119,11 @@ public class TimeSystem : MonoBehaviour
         if (useTime)
         {
             t += Time.deltaTime * TimeSettings.TimeSpeed;
+
             if (t >= cycle)
             {
                 CurrentMinute++;
+                spendTime?.Invoke(1);
                 t = 0;
             }
         }
@@ -156,6 +159,36 @@ public class TimeSystem : MonoBehaviour
     {
         endDay?.Invoke();
         StartNewDay();
+    }
+
+    public void SkipTimeToThis(int targetHour, int targetMinute)
+    {
+        int totalMinutes = 0;
+
+        int hour = _currentHour;
+        int minute = _currentMinute;
+
+        while(!(hour==targetHour && minute == targetMinute))
+        {
+            if(hour < startLunchHour || hour >= endLunchHour)
+            {
+                totalMinutes++;
+            }
+            minute++;
+
+            if(minute >= cycle)
+            {
+                hour++;
+                minute = 0;
+            }
+        }
+
+        spendTime?.Invoke(totalMinutes);
+
+        CurrentHour = hour;
+        CurrentMinute = minute;
+
+        CheckDatePart();
     }
 
     private void CheckDatePart()

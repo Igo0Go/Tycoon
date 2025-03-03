@@ -27,11 +27,13 @@ public class EmployeeSystem : MonoBehaviour
         private List<Employee> _employees;
 
     public event Action<List<Employee>> teamChanged;
+    public event Action<Employee> dismissEmployee;
 
     public void SubscribeEvents(TimeSystem timeSystem)
     {
         timeSystem.startNewDay += AllStartDay;
         timeSystem.startWork += AllToWork;
+        timeSystem.startLunch += AllToLunch;
         timeSystem.endWork += AllEndWork;
         timeSystem.endDay += AllGoHome;
 
@@ -53,6 +55,7 @@ public class EmployeeSystem : MonoBehaviour
     {
         Employees.Remove(employee);
         teamChanged?.Invoke(Employees);
+        dismissEmployee?.Invoke(employee);
     }
 
     private void AllStartDay()
@@ -76,6 +79,7 @@ public class EmployeeSystem : MonoBehaviour
     {
         foreach (Employee e in Employees)
         {
+            e.SetBaseSalaryStatus();
             e.ToWork();
         }
         teamChanged?.Invoke(Employees);
@@ -98,6 +102,13 @@ public class EmployeeSystem : MonoBehaviour
             e.StopWorkTime();
         }
         teamChanged?.Invoke(Employees);
+    }
+    private void AllToLunch()
+    {
+        foreach(Employee e in Employees)
+        {
+            e.StopWorkTime();
+        }
     }
 
     private void OnEmployeeChanged()
