@@ -2,8 +2,10 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TimeSkipPanel : MonoBehaviour
+public class TimeSkipPanel : MonoBehaviour, IUIPanel
 {
+    [SerializeField]
+    private GameObject panelObject;
     [SerializeField]
     private TMP_InputField hoursInputField;
     [SerializeField]
@@ -16,22 +18,33 @@ public class TimeSkipPanel : MonoBehaviour
     private int currentHour;
     private int currentMinute;
 
-    private void Awake()
+    public void SubscribeEvents(TimeSystem timeSystem)
     {
-        timeSystem = FindObjectOfType<TimeSystem>();
+        this.timeSystem = timeSystem;
         timeSystem.hoursChanged += SetHourTextForSkipPanel;
         timeSystem.minutesChanged += SetMinuteTextForSkipPanel;
 
         hoursInputField.onEndEdit.AddListener(OnInputFieldEndEdit);
         minutesInputField.onEndEdit.AddListener(OnInputFieldEndEdit);
     }
-
-    public void SetUpPanel()
+    public void SetUp()
     {
         hoursInputField.text = (timeSystem.CurrentHour + 1).ToString();
         minutesInputField.text = timeSystem.CurrentMinute.ToString();
         OnInputFieldEndEdit(string.Empty);
+        panelObject.SetActive(false);
     }
+    public void ShowPanel()
+    {
+        panelObject.SetActive(true);
+        SetHourTextForSkipPanel(timeSystem.CurrentHour);
+        SetMinuteTextForSkipPanel(timeSystem.CurrentMinute);
+    }
+    public void HidePanel()
+    {
+        panelObject.SetActive(false);
+    }
+
     public void PlusHour()
     {
         currentHour++;
@@ -58,8 +71,10 @@ public class TimeSkipPanel : MonoBehaviour
     }
     public void SkipTime()
     {
-        timeSystem.CurrentHour = currentHour;
-        timeSystem.CurrentMinute = currentMinute;
+        currentHour = Mathf.Clamp(int.Parse(hoursInputField.text), 0, TimeSystem.hourCycle - 1);
+        currentMinute = Mathf.Clamp(int.Parse(minutesInputField.text), 0, TimeSystem.cycle - 1);
+        timeSystem.SkipTimeToThis(currentHour, currentMinute);
+        panelObject.SetActive(false);
     }
 
     private void SetHourTextForSkipPanel(int hours)

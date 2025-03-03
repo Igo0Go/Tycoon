@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class MessagePanel : MonoBehaviour
 {
+    public event Action okEvent;
     public event Action yesEvent;
     public event Action noEvent;
 
@@ -21,25 +22,41 @@ public class MessagePanel : MonoBehaviour
     [SerializeField]
     private Button noButton;
 
-    private void Awake()
+    public event Action messageHiden;
+
+    public void SubscribeEvents(MessageQueue messageQueue)
     {
         okButton.onClick.AddListener(OnOkButtonClick);
         yesButton.onClick.AddListener(OnYesButtonClick);
         noButton.onClick.AddListener(OnNoButtonClick);
-
+        messageQueue.messageReceived += ShowMessage;
+        messageQueue.noMoreMessages += () => panel.SetActive(false);
         HideAll();
     }
 
-    public void ShowMessage(string header, string message)
+    public void ShowMessage(MessageInfo info)
+    {
+        if(info.yesAction == null && info.noAction == null)
+        {
+            ShowMessage(info.Header, info.Message, info.okAction);
+        }
+        else
+        {
+            ShowMessage(info.Header, info.Message, info.yesAction, info.noAction);
+        }
+    }
+
+    private void ShowMessage(string header, string message, Action okAction)
     {
         HideAll();
+        okEvent += okAction;
         panel.SetActive(true);
         headerText.text = header;
         messageText.text = message;
         okButton.gameObject.SetActive(true);
     }
 
-    public void ShowMessage(string header, string message, Action yesAction, Action noAction)
+    private void ShowMessage(string header, string message, Action yesAction, Action noAction)
     {
         HideAll();
         panel.SetActive(true);
@@ -53,25 +70,31 @@ public class MessagePanel : MonoBehaviour
 
     private void HideAll()
     {
+        yesEvent = null;
+        noEvent = null;
+        okEvent = null;
         okButton.gameObject.SetActive(false);
         yesButton.gameObject.SetActive(false);
         noButton.gameObject.SetActive(false);
         panel.SetActive(false);
     }
+
     private void OnOkButtonClick()
     {
-        panel.SetActive(false);
+        okEvent?.Invoke();
+        okEvent = null;
+        messageHiden?.Invoke();
     }
     private void OnYesButtonClick()
     {
         yesEvent?.Invoke();
         yesEvent = null;
-        panel.SetActive(false);
+        messageHiden?.Invoke();
     }
     private void OnNoButtonClick()
     {
         noEvent?.Invoke();
         noEvent = null;
-        panel.SetActive(false);
+        messageHiden?.Invoke();
     }
 }

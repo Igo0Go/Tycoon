@@ -6,20 +6,42 @@ public class TimeSystem : MonoBehaviour
     [SerializeField, Range(1, 1000)]
     private float timeSpeed = 1;
 
-    [SerializeField, TextArea(5, 10)]
-    private string lunchMessage;
+    [Space(20)]
     [SerializeField, TextArea(5, 10)]
     private string startDayMessage;
     [SerializeField, TextArea(5, 10)]
+    private string lunchMessage;
+    [SerializeField, TextArea(5, 10)]
+    private string endWorkMessage;
+    [SerializeField, TextArea(5, 10)]
     private string endDayMessage;
+    [SerializeField, TextArea(5, 10)]
+    private string overtimePrepareMessage;
+
+    [Space(20)]
+    [SerializeField]
+    private int startDayHour = 9;
+    [SerializeField]
+    private int startLunchHour = 13;
+    [SerializeField]
+    private int endLunchHour = 14;
+    [SerializeField]
+    private int endWorkDayHour = 18;
+    [SerializeField]
+    private int endDayHour = 0;
 
     public event Action<int> hoursChanged;
     public event Action<int> minutesChanged;
     public event Action<DateTime> dateChanged;
-    public event Action startLunch;
-    public event Action startWork;
-    public event Action endDay;
+    public event Action<int> spendTime;
 
+    public event Action startNewDay;
+    public event Action startWork;
+    public event Action endWork;
+    public event Action startLunch;
+    public event Action overtimeAccepted;
+    public event Action startOvertime;
+    public event Action endDay;
 
     public int CurrentHour
     {
@@ -77,17 +99,15 @@ public class TimeSystem : MonoBehaviour
 
     public const int cycle = 60;
     public const int hourCycle = 24;
-    private const int startDayHour = 9;
-    private const int endDayHour = 18;
-    private const int startLunchHour = 13;
-    private const int endLunchHour = 14;
+
+    private const int prepareOvertimeHour = 17;
 
     private DayPart currentDayPart;
     private bool useTime;
     private float t = 0;
 
 
-    private void Start()
+    public void SetUp()
     {
         CurrentDate = DateTime.Now;
         TimeSettings.TimeSpeed = timeSpeed;
@@ -99,9 +119,11 @@ public class TimeSystem : MonoBehaviour
         if (useTime)
         {
             t += Time.deltaTime * TimeSettings.TimeSpeed;
+
             if (t >= cycle)
             {
                 CurrentMinute++;
+                spendTime?.Invoke(1);
                 t = 0;
             }
         }
@@ -112,6 +134,7 @@ public class TimeSystem : MonoBehaviour
         CurrentHour = 9;
         CurrentMinute = 0;
         useTime = true;
+        startNewDay?.Invoke();
         startWork?.Invoke();
 
         if(CurrentDate.DayOfWeek == DayOfWeek.Friday)
@@ -123,7 +146,7 @@ public class TimeSystem : MonoBehaviour
             CurrentDate = CurrentDate.AddDays(1);
         }
 
-        GameUICenter.messagePanel.ShowMessage("Новый день!", startDayMessage);
+        GameUICenter.messageQueue.PrepareMessage("Новый день!", startDayMessage);
     }
 
     public void SkipLunch()
@@ -132,10 +155,46 @@ public class TimeSystem : MonoBehaviour
         CurrentHour = endLunchHour;
     }
 
+    public void EndDay()
+    {
+        endDay?.Invoke();
+        StartNewDay();
+    }
+
+    public void SkipTimeToThis(int targetHour, int targetMinute)
+    {
+        int totalMinutes = 0;
+
+        int hour = _currentHour;
+        int minute = _currentMinute;
+
+        while(!(hour==targetHour && minute == targetMinute))
+        {
+            if(hour < startLunchHour || hour >= endLunchHour)
+            {
+                totalMinutes++;
+            }
+            minute++;
+
+            if(minute >= cycle)
+            {
+                hour++;
+                minute = 0;
+            }
+        }
+
+        spendTime?.Invoke(totalMinutes);
+
+        CurrentHour = hour;
+        CurrentMinute = minute;
+
+        CheckDatePart();
+    }
+
     private void CheckDatePart()
     {
         if ((CurrentHour >= startDayHour && CurrentHour < startLunchHour) ||
-            (CurrentHour >= endLunchHour && CurrentHour < endDayHour))
+            (CurrentHour >= endLunchHour && CurrentHour < endWorkDayHour))
         {
             if(currentDayPart != DayPart.Work)
             {
@@ -149,17 +208,28 @@ public class TimeSystem : MonoBehaviour
             {
                 currentDayPart = DayPart.Lunch;
                 startLunch?.Invoke();
-                GameUICenter.messagePanel.ShowMessage("На обед!", lunchMessage, SkipLunch, () => { });
+                GameUICenter.messageQueue.PrepareMessage("На обед!", lunchMessage, SkipLunch, () => { });
             }
         }
-        else if (CurrentHour >= endDayHour || CurrentHour < startDayHour)
+
+        if (CurrentHour >= prepareOvertimeHour && CurrentHour < endWorkDayHour)
+        {
+            GameUICenter.messageQueue.PrepareMessage("Успеваем?", overtimePrepareMessage, () => { overtimeAccepted?.Invoke(); }, null);
+        }
+        else if (CurrentHour >= endWorkDayHour)
         {
             if(currentDayPart != DayPart.HomeTime)
             {
                 currentDayPart = DayPart.HomeTime;
-                endDay?.Invoke();
-                GameUICenter.messagePanel.ShowMessage("Пока-пока!", endDayMessage, StartNewDay, () => { });
+                endWork?.Invoke();
+                GameUICenter.messageQueue.PrepareMessage("Пока-пока!", endWorkMessage, EndDay, () => { startOvertime?.Invoke(); });
             }
+        }
+        else if (CurrentHour >= endDayHour && CurrentHour < startDayHour)
+        {
+            currentDayPart = DayPart.HomeTime;
+            endDay?.Invoke();
+            GameUICenter.messageQueue.PrepareMessage("Вы что-то заседелись", endDayMessage, EndDay);
         }
     }
 }
