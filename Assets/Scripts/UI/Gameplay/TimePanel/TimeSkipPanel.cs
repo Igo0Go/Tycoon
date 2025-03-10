@@ -21,9 +21,7 @@ public class TimeSkipPanel : MonoBehaviour, IUIPanel
     public void SubscribeEvents(TimeSystem timeSystem)
     {
         this.timeSystem = timeSystem;
-        timeSystem.hoursChanged += SetHourTextForSkipPanel;
-        timeSystem.minutesChanged += SetMinuteTextForSkipPanel;
-
+        timeSystem.minutesChanged += (i)=> CheckButtonActive();
         hoursInputField.onEndEdit.AddListener(OnInputFieldEndEdit);
         minutesInputField.onEndEdit.AddListener(OnInputFieldEndEdit);
     }
@@ -73,6 +71,7 @@ public class TimeSkipPanel : MonoBehaviour, IUIPanel
     {
         currentHour = Mathf.Clamp(int.Parse(hoursInputField.text), 0, TimeSystem.hourCycle - 1);
         currentMinute = Mathf.Clamp(int.Parse(minutesInputField.text), 0, TimeSystem.cycle - 1);
+
         timeSystem.SkipTimeToThis(currentHour, currentMinute);
         panelObject.SetActive(false);
     }
@@ -81,19 +80,19 @@ public class TimeSkipPanel : MonoBehaviour, IUIPanel
     {
         hoursInputField.text = hours.ToString();
         currentHour = hours;
-        okButton.interactable = CheckSkipTime();
+        CheckButtonActive();
     }
     private void SetMinuteTextForSkipPanel(int minute)
     {
         minutesInputField.text = minute.ToString();
         currentMinute = minute;
-        okButton.interactable = CheckSkipTime();
+        CheckButtonActive();
     }
 
     private void OnInputFieldEndEdit(string value)
     {
         ClampTime();
-        okButton.interactable = CheckSkipTime();
+        CheckButtonActive();
     }
 
     private void ClampTime()
@@ -107,14 +106,11 @@ public class TimeSkipPanel : MonoBehaviour, IUIPanel
 
     private bool CheckSkipTime()
     {
-        if(currentHour < timeSystem.CurrentHour || 
-            (currentHour == timeSystem.CurrentHour && currentMinute <= timeSystem.CurrentMinute))
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
+        return timeSystem.EqulasTime(currentHour, currentMinute) > 0;
+    }
+
+    private void CheckButtonActive()
+    {
+        okButton.interactable = CheckSkipTime();
     }
 }

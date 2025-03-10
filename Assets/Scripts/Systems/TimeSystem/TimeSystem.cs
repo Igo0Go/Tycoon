@@ -106,6 +106,38 @@ public class TimeSystem : MonoBehaviour
     private bool useTime;
     private float t = 0;
 
+    /// <summary>
+    /// Сравнивает поданное время с текущем временем системы
+    /// </summary>
+    /// <param name="hour">целевой час</param>
+    /// <param name="minute">целевая минута</param>
+    /// <returns>-1 если целевое время раньше текущего, 0 - если равны, 1 - если позже</returns>
+    public int EqulasTime(int hour, int minute)
+    {
+        if(hour < CurrentHour)
+        {
+            return -1;
+        }
+        else if(hour == CurrentHour)
+        {
+            if(minute < CurrentMinute)
+            {
+                return -1;
+            }
+            else if (minute == CurrentMinute)
+            {
+                return 0;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+        else
+        {
+            return 1;
+        }
+    }
 
     public void SetUp()
     {
