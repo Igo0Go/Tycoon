@@ -10,4 +10,6 @@ public class EmployeeBuilderInfo
     public float overtimeSalaryMultiplier = 2;
     [Range(0, 2)]
     public float hospitalSalaryMultiplier = 0.5f;
+    [Min(1)]
+    public float costOfAttracting = 100;
 }

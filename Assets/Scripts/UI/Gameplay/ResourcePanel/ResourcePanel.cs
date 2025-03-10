@@ -41,6 +41,10 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
     private Slider stressSlider;
     [SerializeField]
     private Slider fatigueSlider;
+    [SerializeField]
+    private Button showEnmployeesButton;
+    [SerializeField]
+    private Button showRecrutsButton;
 
     [Space]
     [SerializeField]
@@ -63,8 +67,36 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
     }
     private Employee _currentEmployee;
 
+    private EmployeeListDrawMode Mode
+    {
+        get
+        {
+            return Mode;
+        }
+        set
+        {
+            _mode = value;
+            if(_mode == EmployeeListDrawMode.recruts)
+            {
+                showRecrutsButton.enabled = false;
+                showEnmployeesButton.enabled = true;
+            }
+            else
+            {
+                showRecrutsButton.enabled = true;
+                showEnmployeesButton.enabled = false;
+            }
+        }
+    }
+    private EmployeeListDrawMode _mode;
+
     public void SubscribeEvents(FinanceSystem financeSystem, EmployeeSystem employeeSystem)
     {
+        Mode = EmployeeListDrawMode.team;
+
+        showEnmployeesButton.onClick.AddListener(() => SetDrawMode(EmployeeListDrawMode.team));
+        showRecrutsButton.onClick.AddListener(() => SetDrawMode(EmployeeListDrawMode.recruts));
+
         this.financeSystem = financeSystem;
         financeSystem.currentSummChanged += OnCurrentSumChanged;
         this.employeeSystem = employeeSystem;
@@ -104,6 +136,34 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
     {
         employeeSystem.DismissEmployee(CurrentEmployee);
         CurrentEmployee = null;
+    }
+
+    public void SetDrawMode(EmployeeListDrawMode drawMode)
+    {
+        Mode = drawMode;
+        if(_mode == EmployeeListDrawMode.team)
+        {
+            RebuildEmployeesList(employeeSystem.Employees);
+        }
+        else
+        {
+            RebuildEmployeesList(employeeSystem.Recruts);
+        }
+    }
+
+    public void ShowEmployees(List<Employee> employees)
+    {
+        if(_mode == EmployeeListDrawMode.team)
+        {
+            RebuildEmployeesList(employees);
+        }
+    }
+    public void ShowRecruts(List<Employee> employees)
+    {
+        if (_mode == EmployeeListDrawMode.recruts)
+        {
+            RebuildEmployeesList(employees);
+        }
     }
 
     public void PlusSalaryForCurrentEmployee()
@@ -181,4 +241,10 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
         ClearEmployeeList();
         resurcePanel.SetActive(false);
     }
+}
+
+public enum EmployeeListDrawMode
+{
+    team,
+    recruts
 }

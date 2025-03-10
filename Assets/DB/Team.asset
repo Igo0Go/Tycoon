@@ -19,36 +19,45 @@ MonoBehaviour:
     baseSalary: 30
     overtimeSalaryMultiplier: 2
     hospitalSalaryMultiplier: 0.5
+    costOfAttracting: 100
   - name: "\u041A\u0443\u0440\u043E\u0447\u043A\u0438\u043D\u0430 \u041B\u0438\u0434\u0438\u044F"
     baseSalary: 25
     overtimeSalaryMultiplier: 2
     hospitalSalaryMultiplier: 0.5
+    costOfAttracting: 100
   - name: "\u0410\u0432\u044C\u044F\u043B\u043E\u0432 \u0410\u043B\u0435\u043A\u0441\u0435\u0439"
     baseSalary: 45
     overtimeSalaryMultiplier: 2
     hospitalSalaryMultiplier: 0.5
+    costOfAttracting: 100
   - name: "\u041A\u043E\u0448\u043A\u0430 \u0410\u043B\u0438\u0441\u0430"
     baseSalary: 25
     overtimeSalaryMultiplier: 2
     hospitalSalaryMultiplier: 0.5
+    costOfAttracting: 100
   _recruts:
   - name: "\u0422\u0440\u0430\u0432\u043D\u0438\u043A\u043E\u0432 \u0415\u0432\u0433\u0435\u043D\u0438\u0439"
     baseSalary: 15
     overtimeSalaryMultiplier: 2
     hospitalSalaryMultiplier: 0.5
+    costOfAttracting: 45
   - name: "\u0412\u0435\u043B\u0438\u0441\u043E\u0432\u0430 \u0410\u043D\u043D\u0430"
     baseSalary: 15
     overtimeSalaryMultiplier: 2
     hospitalSalaryMultiplier: 0.5
+    costOfAttracting: 30
   - name: "\u041A\u043E\u0436\u0435\u043C\u044F\u043A\u043E \u0410\u0440\u043A\u0430\u0434\u0438\u0439"
-    baseSalary: 15
+    baseSalary: 20
     overtimeSalaryMultiplier: 2
     hospitalSalaryMultiplier: 0.5
+    costOfAttracting: 45
   - name: "\u041C\u044F\u0432\u043A\u0430 \u0412\u0430\u0441\u0438\u043B\u0438\u0441\u0430"
-    baseSalary: 15
+    baseSalary: 30
     overtimeSalaryMultiplier: 2
     hospitalSalaryMultiplier: 0.5
+    costOfAttracting: 70
   - name: "\u0421\u0430\u0440\u0430\u043D\u0438\u043D \u042D\u043C\u0438\u043B\u044C"
-    baseSalary: 15
+    baseSalary: 50
     overtimeSalaryMultiplier: 2
     hospitalSalaryMultiplier: 0.5
+    costOfAttracting: 100

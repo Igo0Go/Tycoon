@@ -22,6 +22,8 @@ public class Employee
     public float OvertimeSalaryMultiplier => overtimeSalaryMultiplier;
     public float HospitalSalaryMultiplier => hospitalSalaryMultiplier;
 
+    public float CostOfAttracting { get; private set; }
+
     public string State
     {
         get
@@ -95,15 +97,18 @@ public class Employee
     public event Action employeeChanged;
     public event Action<Employee> employeeMaxStress;
     public event Action<Employee> employeeMaxFatigue;
+    public event Action<Employee> employeeRecruting;
     public event Action doTask;
     public event Action taskChanged;
 
-    public Employee(string name, float baseSalary, float overtimeSalaryMultiplier, float hospitalSalaryMultiplier)
+    public Employee(string name, float baseSalary, float overtimeSalaryMultiplier, float hospitalSalaryMultiplier, 
+        float costOfAttractiong)
     {
         this.name = name;
         this.baseSalary = baseSalary;
         this.overtimeSalaryMultiplier = overtimeSalaryMultiplier;
         this.hospitalSalaryMultiplier = hospitalSalaryMultiplier;
+        this.CostOfAttracting = costOfAttractiong;
 
         employeeTaskSpeed = new Dictionary<EmployeeTaskType, int>();
         employeeTaskSpeed.Add(EmployeeTaskType.Code, 0);
@@ -222,5 +227,10 @@ public class Employee
             employeeMaxFatigue?.Invoke(this);
         }
         return true;
+    }
+
+    public void Recruting()
+    {
+        employeeRecruting?.Invoke(this);
     }
 }
