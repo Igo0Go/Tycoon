@@ -30,6 +30,7 @@ public class TimePanel : MonoBehaviour
         timeSystem.endWork += () => OnDayPartChanged("־עהûץ");
         timeSystem.startOvertime += OnStartOvertime;
         timeSystem.dateChanged += OnDateChanged;
+        timeSystem.startNewDay += () => goHomeButton.SetActive(false);
     }
 
     private void OnHoursChanged(int hour)
