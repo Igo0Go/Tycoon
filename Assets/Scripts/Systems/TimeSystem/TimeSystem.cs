@@ -151,8 +151,11 @@ public class TimeSystem : MonoBehaviour
 
     public void SkipLunch()
     {
-        _currentMinute = 0;
-        CurrentHour = endLunchHour;
+        if(CurrentHour < endLunchHour)
+        {
+            _currentMinute = 0;
+            CurrentHour = endLunchHour;
+        }
     }
 
     public void EndDay()
