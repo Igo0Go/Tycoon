@@ -71,7 +71,7 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
     {
         get
         {
-            return Mode;
+            return _mode;
         }
         set
         {
@@ -101,8 +101,10 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
         financeSystem.currentSummChanged += OnCurrentSumChanged;
         this.employeeSystem = employeeSystem;
         employeeSystem.teamChanged += RedrawEmployeesStatsPanel;
-        employeeSystem.teamChanged += RebuildEmployeesList;
         employeeSystem.teamChanged += (e)=> RedrawFinanceInfo();
+
+        employeeSystem.teamChanged += ShowEmployees;
+        employeeSystem.recrutsChanged += ShowRecruts;
     }
     public void SetUp()
     {
@@ -174,11 +176,35 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
     {
         CurrentEmployee.MinusSalary(1);
     }
+    private void OnEmployeeUIItemClick(Employee e)
+    {
+        if(Mode == EmployeeListDrawMode.team)
+        {
+            SelectEmployee(e);
+        }
+        else
+        {
+            AddNewEmployee(e);
+        }
+    }
+
+    private void AddNewEmployee(Employee e)
+    {
+        if(financeSystem.CurrentSum > e.CostOfAttracting)
+        {
+            financeSystem.CurrentSum -= e.CostOfAttracting;
+            employeeSystem.AddRecrutToTeam(e);
+        }
+        else
+        {
+            GameUICenter.messageQueue.PrepareMessage("ћы на мели!", "Ќам не хватает денег, чтобы заплатить стартовый аванс работнику");
+        }
+    }
     private void SelectEmployee(Employee e)
     {
-        if(CurrentEmployee != e)
+        if (CurrentEmployee != e)
         {
-            if(CurrentEmployee != null)
+            if (CurrentEmployee != null)
             {
                 CurrentEmployee.employeeChanged -= RedrawCurrentEmployeeInfo;
             }
@@ -203,8 +229,8 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
         foreach (Employee e in employees)
         {
             EmployeeUiItem item = Instantiate(employeeUIItemPrefab, employeeListContentContainer).GetComponent<EmployeeUiItem>();
-            item.Init(e);
-            item.OnEmployeeClick += SelectEmployee;
+            item.Init(e, _mode == EmployeeListDrawMode.recruts);
+            item.OnEmployeeClick += OnEmployeeUIItemClick;
         }
     }
     private void RedrawCurrentEmployeeInfo()
@@ -232,7 +258,14 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
     {
         resurcePanel.SetActive(true);
         RedrawFinanceInfo();
-        RebuildEmployeesList(employeeSystem.Employees);
+        if(Mode == EmployeeListDrawMode.recruts)
+        {
+            ShowRecruts(employeeSystem.Recruts);
+        }
+        else
+        {
+            ShowRecruts(employeeSystem.Employees);
+        }
     }
 
     public void HidePanel()

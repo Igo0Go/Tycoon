@@ -10,21 +10,27 @@ public class EmployeeUiItem : MonoBehaviour
     private TMP_Text stateText;
     [SerializeField]
     private TMP_Text paymentText;
+    [SerializeField]
+    private TMP_Text buttonText;
 
     private Employee emp;
+    private bool recrut;
 
     public event Action<Employee> OnEmployeeClick;
 
-    public void Init(Employee employee)
+    public void Init(Employee employee, bool recrut)
     {
+        this.recrut = recrut;
         emp = employee;
         emp.employeeChanged += UpdateInfo;
+        buttonText.text = recrut ? "Нанять" : "Детали";
         UpdateInfo();
     }
     public void OnDestroy()
     {
         emp.employeeChanged -= UpdateInfo;
     }
+
 
 
     public void OnClick()
@@ -35,7 +41,7 @@ public class EmployeeUiItem : MonoBehaviour
     private void UpdateInfo()
     {
         nameText.text = emp.Name;
-        stateText.text = emp.State;
-        paymentText.text = emp.GetSalaryInfo();
+        stateText.text = recrut ? "Стажёр. Стоимость привлечения: " : emp.State;
+        paymentText.text = recrut? emp.CostOfAttracting.ToString() : emp.GetSalaryInfo();
     }
 }

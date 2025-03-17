@@ -42,6 +42,7 @@ public class EmployeeSystem : MonoBehaviour
     public event Action<List<Employee>> teamChanged;
     public event Action<List<Employee>> recrutsChanged;
     public event Action<Employee> dismissEmployee;
+    public event Action<Employee> newEmployee;
 
     public void SubscribeEvents(TimeSystem timeSystem)
     {
@@ -89,6 +90,8 @@ public class EmployeeSystem : MonoBehaviour
 
         teamChanged?.Invoke(Employees);
         recrutsChanged?.Invoke(Recruts);
+        newEmployee?.Invoke(e);
+        e.ToWork();
     }
 
     private void AllStartDay()

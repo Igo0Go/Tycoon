@@ -6,10 +6,16 @@ public class MessageQueue : MonoBehaviour
 {
     public event Action<MessageInfo> messageReceived;
     public event Action noMoreMessages;
+    public event Action<string> newLog;
 
     private MessageInfo currentMessage;
 
     private List<MessageInfo> messages = new List<MessageInfo>();
+
+    public void Log(string text)
+    {
+        newLog?.Invoke(text);
+    }
 
     public void SubscribeEvents(MessagePanel panel)
     {
