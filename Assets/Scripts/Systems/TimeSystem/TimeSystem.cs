@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class TimeSystem : MonoBehaviour
 {
@@ -30,10 +32,16 @@ public class TimeSystem : MonoBehaviour
     [SerializeField]
     private int endDayHour = 0;
 
+    [SerializeField, Min(1)]
+    private int projectDayLimit = 20;
+    [SerializeField]
+    private List<DayEvent> dayEvents = new List<DayEvent>();
+
     public event Action<int> hoursChanged;
     public event Action<int> minutesChanged;
     public event Action<DateTime> dateChanged;
     public event Action<int> spendTime;
+    public event Action<int> currentDayChanged;
 
     public event Action startNewDay;
     public event Action startWork;
@@ -106,6 +114,8 @@ public class TimeSystem : MonoBehaviour
     private bool useTime;
     private float t = 0;
 
+    private int currentDayCount = -1;
+
     /// <summary>
     /// Сравнивает поданное время с текущем временем системы
     /// </summary>
@@ -172,13 +182,26 @@ public class TimeSystem : MonoBehaviour
         if(CurrentDate.DayOfWeek == DayOfWeek.Friday)
         {
             CurrentDate = CurrentDate.AddDays(3);
+            currentDayCount += 3;
+            currentDayChanged?.Invoke( projectDayLimit - currentDayCount);
         }
         else
         {
             CurrentDate = CurrentDate.AddDays(1);
+            currentDayCount += 1;
+            currentDayChanged?.Invoke(projectDayLimit - currentDayCount);
         }
 
-        GameUICenter.messageQueue.PrepareMessage("Новый день!", startDayMessage);
+        if(currentDayCount > projectDayLimit)
+        {
+            GameUICenter.messageQueue.PrepareMessage("Время вышло!", "Время на выполнение проекта истекло! Конец игры");
+            useTime = false;
+        }
+        else
+        {
+            GameUICenter.messageQueue.PrepareMessage("Новый день!", startDayMessage);
+            CheckDayEvents();
+        }
     }
 
     public void SkipLunch()
@@ -267,6 +290,32 @@ public class TimeSystem : MonoBehaviour
             GameUICenter.messageQueue.PrepareMessage("Вы что-то заседелись", endDayMessage, EndDay);
         }
     }
+
+    private void CheckDayEvents()
+    {
+        for (int i = 0; i < dayEvents.Count; i++)
+        {
+            DayEvent currentEvent = dayEvents[i];
+
+            if(currentDayCount >= currentEvent.day)
+            {
+                GameUICenter.messageQueue.PrepareMessage(currentEvent.Header, currentEvent.Message);
+                currentEvent.onDayEvent.Invoke();
+                dayEvents.RemoveAt(i);
+                i--;
+            }
+        }
+    }
+}
+
+[System.Serializable]
+public class DayEvent
+{
+    public string Header;
+    [TextArea(5,10)]
+    public string Message;
+    public int day;
+    public UnityEvent onDayEvent;
 }
 
 public static class TimeSettings

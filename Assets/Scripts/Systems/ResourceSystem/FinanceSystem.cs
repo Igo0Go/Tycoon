@@ -50,9 +50,21 @@ public class FinanceSystem : MonoBehaviour
     }
 
     public event Action<float> currentSummChanged;
+    public event Action currentRentCostChanged;
     public event Action financeLost;
 
     private EmployeeSystem employeeSystem;
+   
+    public void AddMoney(int money)
+    {
+        CurrentSum += money;
+    }
+
+    public void SetArendaCost(float newArendaCost)
+    {
+        dayRentCost = newArendaCost;
+        currentRentCostChanged?.Invoke();
+    }
 
     public void SetUp()
     {

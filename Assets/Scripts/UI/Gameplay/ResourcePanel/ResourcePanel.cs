@@ -99,6 +99,7 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
 
         this.financeSystem = financeSystem;
         financeSystem.currentSummChanged += OnCurrentSumChanged;
+        financeSystem.currentRentCostChanged += RedrawFinanceInfo;
         this.employeeSystem = employeeSystem;
         employeeSystem.teamChanged += RedrawEmployeesStatsPanel;
         employeeSystem.teamChanged += (e)=> RedrawFinanceInfo();
