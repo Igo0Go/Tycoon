@@ -148,7 +148,7 @@ GameObject:
   - component: {fileID: 1489036112}
   - component: {fileID: 1489036111}
   m_Layer: 5
-  m_Name: btn_Details
+  m_Name: btn_Action
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -900,3 +900,4 @@ MonoBehaviour:
   nameText: {fileID: 3544280308673330084}
   stateText: {fileID: 3544280308627280348}
   paymentText: {fileID: 3544280309854145688}
+  buttonText: {fileID: 1247757718}

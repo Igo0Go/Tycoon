@@ -26,8 +26,23 @@ public class EmployeeSystem : MonoBehaviour
     }
         private List<Employee> _employees;
 
+    public List<Employee> Recruts
+    {
+        get
+        {
+            if (_recruts == null)
+            {
+                _recruts = team.GetRecruts();
+            }
+            return _recruts;
+        }
+    }
+    private List<Employee> _recruts;
+
     public event Action<List<Employee>> teamChanged;
+    public event Action<List<Employee>> recrutsChanged;
     public event Action<Employee> dismissEmployee;
+    public event Action<Employee> newEmployee;
 
     public void SubscribeEvents(TimeSystem timeSystem)
     {
@@ -45,6 +60,10 @@ public class EmployeeSystem : MonoBehaviour
             e.employeeMaxFatigue += OnEmployeeMaxFatigue;
             e.employeeMaxStress += OnEmployeeMaxStress;
         }
+        foreach (Employee e in Recruts)
+        {
+            e.employeeRecruting += AddRecrutToTeam;
+        }
     }
     public void SetUp()
     {
@@ -56,6 +75,23 @@ public class EmployeeSystem : MonoBehaviour
         Employees.Remove(employee);
         teamChanged?.Invoke(Employees);
         dismissEmployee?.Invoke(employee);
+    }
+
+    public void AddRecrutToTeam(Employee e)
+    {
+        e.employeeRecruting -= AddRecrutToTeam;
+
+        Recruts.Remove(e);
+        Employees.Add(e);
+
+        e.employeeChanged += OnEmployeeChanged;
+        e.employeeMaxFatigue += OnEmployeeMaxFatigue;
+        e.employeeMaxStress += OnEmployeeMaxStress;
+
+        teamChanged?.Invoke(Employees);
+        recrutsChanged?.Invoke(Recruts);
+        newEmployee?.Invoke(e);
+        e.ToWork();
     }
 
     private void AllStartDay()

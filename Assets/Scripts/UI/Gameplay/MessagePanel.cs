@@ -22,7 +22,20 @@ public class MessagePanel : MonoBehaviour
     [SerializeField]
     private Button noButton;
 
+    [Space(20)]
+    [SerializeField]
+    private GameObject logItemPrefab;
+    [SerializeField]
+    private GameObject logPanel;
+    [SerializeField]
+    private Transform logConent;
+
     public event Action messageHiden;
+
+    public void ShowLogToggle()
+    {
+        logPanel.SetActive(!logPanel.activeSelf);
+    }
 
     public void SubscribeEvents(MessageQueue messageQueue)
     {
@@ -31,7 +44,9 @@ public class MessagePanel : MonoBehaviour
         noButton.onClick.AddListener(OnNoButtonClick);
         messageQueue.messageReceived += ShowMessage;
         messageQueue.noMoreMessages += () => panel.SetActive(false);
+        messageQueue.newLog += AddLogItem;
         HideAll();
+        logPanel.SetActive(false);
     }
 
     public void ShowMessage(MessageInfo info)
@@ -44,6 +59,12 @@ public class MessagePanel : MonoBehaviour
         {
             ShowMessage(info.Header, info.Message, info.yesAction, info.noAction);
         }
+    }
+
+    private void AddLogItem(string text)
+    {
+        TMP_Text messageItem = Instantiate(logItemPrefab, logConent).GetComponent<TMP_Text>();
+        messageItem.text = text;
     }
 
     private void ShowMessage(string header, string message, Action okAction)

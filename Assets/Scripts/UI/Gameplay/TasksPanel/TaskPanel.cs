@@ -22,6 +22,7 @@ public class TaskPanel : MonoBehaviour, IUIPanel
         taskSystem = employeeTaskSystem;
         taskSystem.taskToBaclog += SpawnTaskCard;
         employeeSystem.dismissEmployee += OnEmployeeRemove;
+        employeeSystem.newEmployee += SpawnEmployee;
     }
 
     public void SetUp(EmployeeSystem employeeSystem)
@@ -61,13 +62,17 @@ public class TaskPanel : MonoBehaviour, IUIPanel
         for (int i = 0; i < employees.Count; i++)
         {
             Employee employee = employees[i];
-            EmployeeTaskCardHolder holder =
-                Instantiate(cardHolderPrefab, taskCardsHodlersContainer).GetComponent<EmployeeTaskCardHolder>();
-
-            holder.Init(employee);
-            holder.taskAdded += OnEmployeeAddTask;
-            holder.taskRemoved += OnEmployeeRemoveTask;
+            SpawnEmployee(employee);
         }
+    }
+    private void SpawnEmployee(Employee employee)
+    {
+        EmployeeTaskCardHolder holder = 
+            Instantiate(cardHolderPrefab, taskCardsHodlersContainer).GetComponent<EmployeeTaskCardHolder>();
+
+        holder.Init(employee);
+        holder.taskAdded += OnEmployeeAddTask;
+        holder.taskRemoved += OnEmployeeRemoveTask;
     }
 
     private void OnEmployeeRemove(Employee employee)

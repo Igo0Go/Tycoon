@@ -43,7 +43,7 @@ public class EmployeeTaskSystem : MonoBehaviour
                 e.CurrentTask = employeesAndTasks[e][0];
                 employeesAndTasks[e].Remove(e.CurrentTask);
 
-                Debug.Log(e.Name + " берёт задачу " +  e.CurrentTask.Name);
+                GameUICenter.messageQueue.Log(e.Name + " берёт задачу " + e.CurrentTask.Name);
 
                 if(e.CurrentTask.Type == EmployeeTaskType.Testing)
                 {
@@ -58,7 +58,8 @@ public class EmployeeTaskSystem : MonoBehaviour
             {
                 if(e.CurrentTask.Progress >= 100)
                 {
-                    Debug.Log(e.Name + " выполняет задачу " + e.CurrentTask.Name);
+                    GameUICenter.messageQueue.Log(e.Name + " выполняет задачу " + e.CurrentTask.Name);
+          
 
                     if (e.CurrentTask.Testing)
                     {
@@ -67,7 +68,8 @@ public class EmployeeTaskSystem : MonoBehaviour
                             Backlog.Add(e.CurrentTask);
                             taskToBaclog?.Invoke(e.CurrentTask);
                             incorrectTaskFound?.Invoke(e.CurrentTask);
-                            Debug.Log("Найдена некорректно выполненная задача");
+                            GameUICenter.messageQueue.Log(e.Name + " сообщает, что задача " + 
+                                e.CurrentTask.Name + " выполнена некорректно.");
                         }
 
                         employeesAndTasks[e].Remove(e.CurrentTask);
