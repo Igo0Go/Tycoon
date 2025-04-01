@@ -165,7 +165,7 @@ public class TimeSystem : MonoBehaviour
     {
         if (useTime)
         {
-            t += Time.deltaTime * TimeSettings.TimeSpeed;
+            t += Time.deltaTime * TimeSettings.TimeSpeed * TimeSettings.TimeSpeedMultiplier;
 
             if (t >= cycle)
             {
@@ -174,6 +174,7 @@ public class TimeSystem : MonoBehaviour
                 t = 0;
             }
         }
+        ChangeSpeed();
     }
 
     public void StartNewDay()
@@ -311,6 +312,30 @@ public class TimeSystem : MonoBehaviour
             }
         }
     }
+
+    private void ChangeSpeed()
+    {
+        if(Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            TimeSettings.TimeSpeedMultiplier = 1;
+        }
+        else if(Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            TimeSettings.TimeSpeedMultiplier = 2;
+        }
+        else if(Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            TimeSettings.TimeSpeedMultiplier = 4;
+        }
+        else if(Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            TimeSettings.TimeSpeedMultiplier = 10;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha5))
+        {
+            TimeSettings.TimeSpeedMultiplier = 100;
+        }
+    }
 }
 
 [System.Serializable]
@@ -326,6 +351,7 @@ public class DayEvent
 public static class TimeSettings
 {
     public static float TimeSpeed = 1;
+    public static float TimeSpeedMultiplier = 1;
 }
 
 public enum DayPart
