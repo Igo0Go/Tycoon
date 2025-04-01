@@ -52,8 +52,11 @@ public class EmployeeTaskCardHolder : MonoBehaviour
         if (Employee.CurrentTask != null)
         {
             currentTaskNameText.text = Employee.CurrentTask.Name + (Employee.CurrentTask.Testing ? 
-                " test[" + Employee.CurrentTask.IsCorrectTask + "]" : "");
-            currentTaskProgressSlider.maxValue = Employee.CurrentTask.AllTaskTime;
+                " T[" + (Employee.CurrentTask.IsCorrectTask? "+":"x") + "]" : "");
+
+            currentTaskProgressSlider.maxValue = Employee.CurrentTask.Testing? 
+                Employee.CurrentTask.TestingTime : Employee.CurrentTask.AllTaskTime;
+
             OnChangeTaskProgress();
             taskContainer.DestroyCardWithThisTask(Employee.CurrentTask);
         }
@@ -68,8 +71,22 @@ public class EmployeeTaskCardHolder : MonoBehaviour
 
     private void OnChangeTaskProgress()
     {
-        currentTaskProgressText.text = "ещё" +
-    (Employee.CurrentTask.AllTaskTime - Employee.CurrentTask.CompleteTaskTime) + "м.";
+        int totalTime = 0;
+
+        if(Employee.CurrentTask.Testing)
+        {
+            totalTime = Employee.CurrentTask.TestingTime - Employee.CurrentTask.CompleteTaskTime;
+        }
+        else
+        {
+            totalTime = Employee.CurrentTask.AllTaskTime - Employee.CurrentTask.CompleteTaskTime;
+        }
+
+
+        int hour = totalTime / 60;
+        int minute = totalTime % 60;
+
+        currentTaskProgressText.text = "ещё " + hour + "ч. " + minute + "м.";
         currentTaskProgressSlider.value = Employee.CurrentTask.CompleteTaskTime;
     }
 }

@@ -26,8 +26,13 @@ public class ProjectDaysPanel : MonoBehaviour, IUIPanel
 
     public void RedrawInfo(int days)
     {
-        projectDaysLimitText.text = "ƒней осталось: " + days;
+        if(days >= 0)
+        {
+            projectDaysLimitText.text = "ƒней осталось: " + days;
+        }
+        else
+        {
+            projectDaysLimitText.text = "ƒень сдачи проекта";
+        }
     }
-
-
 }

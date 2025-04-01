@@ -116,6 +116,11 @@ public class TimeSystem : MonoBehaviour
 
     private int currentDayCount = -1;
 
+    public void SubscribeEvents(EmployeeTaskSystem taskSystem)
+    {
+        taskSystem.projectComplete += () => useTime = false;
+    }
+
     /// <summary>
     /// Сравнивает поданное время с текущем временем системы
     /// </summary>
