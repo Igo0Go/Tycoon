@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-[CreateAssetMenu(menuName = "IgoGo/EmployeeProjectData")]
-public class EmployeeProjectData : ScriptableObject
+public class EmployeeProjectData : MonoBehaviour
 {
     public int projectDayLimit = 20;
     public List<DayEvent> dayEvents = new();

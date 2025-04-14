@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "IgoGoTools/EmployeeStatsSettings")]
+[CreateAssetMenu(menuName = "IgoGo/EmployeeStatsSettings")]
 public class EmployeeStatsSettingsPack : ScriptableObject
 {
     public int baseStreesGrowthSpeed = 2;
