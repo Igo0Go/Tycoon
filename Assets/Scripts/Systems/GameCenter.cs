@@ -30,7 +30,7 @@ public class GameCenter : MonoBehaviour
         resourcePanel.SubscribeEvents(financeSystem, employeeSystem);
         employeeTaskSystem.SubscribeEvents(employeeSystem, timeSystem);
         projectDaysPanel.SubscribeEvents(timeSystem);
-        timeSystem.SubscribeEvents(employeeTaskSystem);
+        timeSystem.SubscribeEvents(employeeTaskSystem, financeSystem);
 
 
         overtimeSelectorPanel.SetUp();

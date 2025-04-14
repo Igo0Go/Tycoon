@@ -43,6 +43,7 @@ public class TimeSystem : MonoBehaviour
     public event Action<int> spendTime;
     public event Action<int> currentDayChanged;
 
+
     public event Action startNewDay;
     public event Action startWork;
     public event Action endWork;
@@ -113,12 +114,14 @@ public class TimeSystem : MonoBehaviour
     private DayPart currentDayPart;
     private bool useTime;
     private float t = 0;
+    private bool financeLost = false;
 
-    private int currentDayCount = -1;
+    private int currentDayCount = 0;
 
-    public void SubscribeEvents(EmployeeTaskSystem taskSystem)
+    public void SubscribeEvents(EmployeeTaskSystem taskSystem, FinanceSystem financeSystem)
     {
         taskSystem.projectComplete += () => useTime = false;
+        financeSystem.financeLost += (value) => financeLost = value;
     }
 
     /// <summary>
@@ -158,7 +161,13 @@ public class TimeSystem : MonoBehaviour
     {
         CurrentDate = DateTime.Now;
         TimeSettings.TimeSpeed = timeSpeed;
-        StartNewDay();
+        CurrentHour = 9;
+        CurrentMinute = 0;
+        useTime = true;
+        startNewDay?.Invoke();
+        startWork?.Invoke();
+        GameUICenter.messageQueue.PrepareMessage("Новый день!", startDayMessage);
+        CheckDayEvents();
     }
 
     private void Update()
@@ -223,6 +232,13 @@ public class TimeSystem : MonoBehaviour
     {
         endDay?.Invoke();
         StartNewDay();
+
+        if(financeLost)
+        {
+            GameUICenter.messageQueue.PrepareMessage("Вот и всё, ребята", "Чуда не случилось. Деньги кончились. " +
+                "И новых средств ждать не стоит. Пора закрываться. \n\n Конец игры");
+            useTime = false;
+        }
     }
 
     public void SkipTimeToThis(int targetHour, int targetMinute)
@@ -351,7 +367,26 @@ public class DayEvent
 public static class TimeSettings
 {
     public static float TimeSpeed = 1;
-    public static float TimeSpeedMultiplier = 1;
+
+    public static float TimeSpeedMultiplier
+    {
+        get
+        { 
+            return _timeSpeedMultiplier;
+        }
+        set
+        {
+            _timeSpeedMultiplier = value;
+            timeSpeedChanged?.Invoke(_timeSpeedMultiplier);
+        }
+    }
+    private static float _timeSpeedMultiplier = 1;
+
+    public static void ClearEvents()
+    {
+        timeSpeedChanged = null;
+    }
+    public static event Action<float> timeSpeedChanged;
 }
 
 public enum DayPart

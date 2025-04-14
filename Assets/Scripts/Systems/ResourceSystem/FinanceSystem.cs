@@ -25,8 +25,12 @@ public class FinanceSystem : MonoBehaviour
             if (currentSum < 0)
             {
                 currentSum = 0;
-                financeLost?.Invoke();
+                financeLost?.Invoke(true);
                 GameUICenter.messageQueue.PrepareMessage("Вы - банкроты!", financeLostText);
+            }
+            else
+            {
+                financeLost?.Invoke(false);
             }
             currentSummChanged?.Invoke(currentSum);
         }
@@ -51,7 +55,7 @@ public class FinanceSystem : MonoBehaviour
 
     public event Action<float> currentSummChanged;
     public event Action currentRentCostChanged;
-    public event Action financeLost;
+    public event Action<bool> financeLost;
 
     private EmployeeSystem employeeSystem;
    
@@ -79,8 +83,8 @@ public class FinanceSystem : MonoBehaviour
 
     private void OnDayEnded()
     {
-        GameUICenter.messageQueue.PrepareMessage("Ваш чек", "За аренду помещения и сопуствующие услуги требуется заплатить " + 
-            CurrentDayCost.ToString());
+        GameUICenter.messageQueue.PrepareMessage("Ваш чек", "За аренду помещения и сопутствующие услуги требуется заплатить " + 
+            CurrentDayCost.ToString() + ".");
         CurrentSum -= CurrentDayCost;
     }
 }

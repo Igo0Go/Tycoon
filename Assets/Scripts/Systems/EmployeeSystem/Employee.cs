@@ -1,45 +1,41 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 [Serializable]
 public class Employee
 {
-    [SerializeField]
-    private string name;
-    [Min(1)]
-    [SerializeField]
-    private float baseSalary;
-    [Range(0,2)]
-    [SerializeField]
-    private float overtimeSalaryMultiplier = 2;
-    [Range(0, 2)]
-    [SerializeField]
-    private float hospitalSalaryMultiplier = 0.5f;
+    public string Name { get; private set; }
+    public float BaseSalary { get; private set; }
 
-    public string Name => name;
-    public float BaseSalary => baseSalary;
-    public float OvertimeSalaryMultiplier => overtimeSalaryMultiplier;
-    public float HospitalSalaryMultiplier => hospitalSalaryMultiplier;
+    public string DissmissSpeach { get; private set; }
 
     public float CostOfAttracting { get; private set; }
 
-    public string State
+    public string WorkExperience => (workMinutes / 60) + "ч.";
+    private int workMinutes = 0;
+
+    public const float overtimeSalaryMultiplier = 2;
+    public float hospitalSalaryMultiplier = 0.5f;
+
+    public string SalaryState => status.StateName;
+    public string DayState
     {
         get
         {
-            if (!OverTime && !workTime)
+            return _dayState switch
             {
-                return "Дома";
-            }
-
-            return status.StateName;
+                EmployeeDayState.work => "Работает",
+                EmployeeDayState.lunch => "Обед",
+                EmployeeDayState.home => "Дома",
+                _ => "Дома",
+            };
         }
     }
 
+    private EmployeeDayState _dayState;
+
     public bool OverTime => status.Overtime;
-    public bool IsActive => workTime && status.IsActive;
-    private bool workTime;
+    public bool IsActive => _dayState == EmployeeDayState.work && status.IsActive;
 
     /// <summary>
     /// Нервозность сотрудника
@@ -101,14 +97,12 @@ public class Employee
     public event Action doTask;
     public event Action taskChanged;
 
-    public Employee(string name, float baseSalary, float overtimeSalaryMultiplier, float hospitalSalaryMultiplier, 
-        float costOfAttractiong)
+    public Employee(string name, float baseSalary, float costOfAttractiong, string dissmissSpeach)
     {
-        this.name = name;
-        this.baseSalary = baseSalary;
-        this.overtimeSalaryMultiplier = overtimeSalaryMultiplier;
-        this.hospitalSalaryMultiplier = hospitalSalaryMultiplier;
-        this.CostOfAttracting = costOfAttractiong;
+        Name = name;
+        BaseSalary = baseSalary;
+        CostOfAttracting = costOfAttractiong;
+        DissmissSpeach = dissmissSpeach;
 
         employeeTaskSpeed = new Dictionary<EmployeeTaskType, int>();
         employeeTaskSpeed.Add(EmployeeTaskType.Code, 0);
@@ -145,24 +139,32 @@ public class Employee
     {
         if(Fatigue < fatigueThresholdValue)
         {
-            workTime = true;
+            _dayState = EmployeeDayState.work;
             employeeChanged?.Invoke();
         }
     }
-    public void StopWorkTime()
+    public void ToLunch()
     {
-        workTime = false;
+        _dayState = EmployeeDayState.lunch;
         employeeChanged?.Invoke();
     }
+    public void GoHome()
+    {
+        _dayState = EmployeeDayState.home;
+        employeeChanged?.Invoke();
+    }
+
+
+
     public void PlusSalary(float value)
     {
-        baseSalary += value;
+        BaseSalary += value;
         Stress--;
         employeeChanged?.Invoke();
     }
     public void MinusSalary(float value)
     {
-        baseSalary -= value;
+        BaseSalary -= value;
         Stress += 2;
         employeeChanged?.Invoke();
     }
@@ -175,7 +177,7 @@ public class Employee
 
     public void DoWork()
     {
-        if(!status.IsActive || !workTime)
+        if(!status.IsActive || !(_dayState == EmployeeDayState.work))
         {
             return;
         }
@@ -191,6 +193,7 @@ public class Employee
             {
                 workSpeed = EmployeeTask.defaultTaskWorkSpeedPerMinute + employeeTaskSpeed[CurrentTask.Type];
             }
+            workMinutes ++;
             CurrentTask.CompleteTaskTime += workSpeed;
             doTask?.Invoke();
         }
@@ -215,7 +218,7 @@ public class Employee
             Stress -= 7 * stressMultiplier;
         }
     }
-    public bool EmployeeInTheTeam()
+    public bool EmployeeWantFireCheck()
     {
         if(Stress >= 100)
         {
@@ -233,4 +236,11 @@ public class Employee
     {
         employeeRecruting?.Invoke(this);
     }
+}
+
+public enum EmployeeDayState
+{
+    home,
+    work,
+    lunch
 }

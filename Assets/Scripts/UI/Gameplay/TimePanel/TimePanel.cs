@@ -11,6 +11,8 @@ public class TimePanel : MonoBehaviour
     [SerializeField]
     private TMP_Text dateText;
     [SerializeField]
+    private TMP_Text timeSpeedText;
+    [SerializeField]
     private GameObject goHomeButton;
 
     private TimeSystem timeSystem;
@@ -31,11 +33,27 @@ public class TimePanel : MonoBehaviour
         timeSystem.startOvertime += OnStartOvertime;
         timeSystem.dateChanged += OnDateChanged;
         timeSystem.startNewDay += () => goHomeButton.SetActive(false);
+
+        TimeSettings.ClearEvents();
+        TimeSettings.timeSpeedChanged += OnChangeTimeSpeed;
     }
 
     private void OnHoursChanged(int hour)
     {
-        timerText.text = hour.ToString() + ":" + timeSystem.CurrentMinute;
+        int minute = timeSystem.CurrentMinute;
+
+        string minutes = string.Empty;
+
+        if (minute < 10)
+        {
+            minutes = "0" + minute;
+        }
+        else
+        {
+            minutes = minute.ToString();
+        }
+
+        timerText.text = hour.ToString() + ":" + minutes;
     }
 
     private void OnMinutesChanged(int minute)
@@ -61,12 +79,45 @@ public class TimePanel : MonoBehaviour
 
     private void OnDateChanged(DateTime date)
     {
-        dateText.text = date.Day + "." + date.Month + "." + date.Year;
+        string dayOfWeek = string.Empty;
+        switch(date.DayOfWeek)
+        {
+            case DayOfWeek.Sunday:
+                dayOfWeek = "Воскресенье";
+                break;
+            case DayOfWeek.Monday:
+                dayOfWeek = "Понедельник";
+                break;
+            case DayOfWeek.Tuesday:
+                dayOfWeek = "Вторник";
+                break;
+            case DayOfWeek.Wednesday:
+                dayOfWeek = "Среда";
+                break;
+            case DayOfWeek.Thursday:
+                dayOfWeek = "Четверг";
+                break;
+            case DayOfWeek.Friday:
+                dayOfWeek = "Пятница";
+                break;
+            case DayOfWeek.Saturday:
+                dayOfWeek = "Суббота";
+                break;
+
+        }
+
+
+        dateText.text = dayOfWeek + "\n" + date.Day + "." + date.Month + "." + date.Year;
     }
 
     private void OnStartOvertime()
     {
         goHomeButton.SetActive(true);
+    }
+
+    private void OnChangeTimeSpeed(float speed) 
+    {
+        timeSpeedText.text = "X" + speed.ToString();
     }
 
     public void OnGoHomeButtonClick()
@@ -75,3 +126,5 @@ public class TimePanel : MonoBehaviour
         goHomeButton.SetActive(false);
     }
 }
+
+

@@ -3,10 +3,12 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class EmployeeTaskCardHolder : MonoBehaviour
+public class EmployeeTaskCardHolder : TooltipElement
 {
     [SerializeField]
     private TMP_Text employeeNameText;
+    [SerializeField]
+    private TMP_Text employeeExperienceText;
     [SerializeField]
     private TMP_Text currentTaskNameText;
     [SerializeField]
@@ -44,6 +46,7 @@ public class EmployeeTaskCardHolder : MonoBehaviour
     private void RedrawEmployeeInfo()
     {
         employeeNameText.text = Employee.Name;
+        employeeExperienceText.text = "Опыт работы: " + Employee.WorkExperience;
         OnChangeTask();
     }
 
@@ -71,6 +74,8 @@ public class EmployeeTaskCardHolder : MonoBehaviour
 
     private void OnChangeTaskProgress()
     {
+        employeeExperienceText.text = "Опыт работы: " + Employee.WorkExperience;
+
         int totalTime = 0;
 
         if(Employee.CurrentTask.Testing)
@@ -88,5 +93,27 @@ public class EmployeeTaskCardHolder : MonoBehaviour
 
         currentTaskProgressText.text = "ещё " + hour + "ч. " + minute + "м.";
         currentTaskProgressSlider.value = Employee.CurrentTask.CompleteTaskTime;
+    }
+
+    protected override string GetStringForTooltip()
+    {
+        string s = Employee.Name + "\n";
+        s += "Опыт работы: " + Employee.WorkExperience + "\n";
+        s += "Усталость: " + Employee.Fatigue + "\n";
+        s += "Стресс: " + Employee.Stress + "\n";
+        s += Employee.DayState + "\n";
+        s += "\n";
+        s += "Оплата: " + Employee.GetSalaryInfo() + "\n";
+        s += "\n";
+        if (Employee.CurrentTask != null)
+        {
+            s += "Текущая задача: " + Employee.CurrentTask.Name + "\n";
+            s += Employee.CurrentTask.Description + "\n";
+            if(Employee.CurrentTask.Testing)
+            {
+                s += "Тестирование";
+            }
+        }
+        return s;
     }
 }

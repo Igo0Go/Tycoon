@@ -185,7 +185,7 @@ public class EmployeeTaskSystem : MonoBehaviour
         }
         else
         {
-            GameUICenter.messageQueue.PrepareMessage("Успех!", "пока все задачи выполнены. Но пока ждём." +
+            GameUICenter.messageQueue.PrepareMessage("Успех!", "Все текущие задачи выполнены. Но пока ждём." +
                 " Надо показать текущий прогресс заказчику. Может, будут правки!");
         }
     }
