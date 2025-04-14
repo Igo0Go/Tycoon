@@ -18,7 +18,7 @@ public class BaseSalaryStatus : SalaryStatus
 {
     public bool IsActive => true;
     public bool Overtime => false;
-    public string StateName => "Работает";
+    public string StateName => "Базовый оклад";
     public float CalculateSalary(Employee employee)
     {
         return employee.BaseSalary;
@@ -35,27 +35,27 @@ public class HospitalSalaryStatus : SalaryStatus
     public string StateName => "На больничном";
     public float CalculateSalary(Employee employee)
     {
-        return employee.BaseSalary * employee.HospitalSalaryMultiplier;
+        return employee.BaseSalary * employee.hospitalSalaryMultiplier;
     }
     public string GetSalaryInfo(Employee employee)
     {
-        float result = employee.BaseSalary * employee.HospitalSalaryMultiplier;
-        return employee.BaseSalary + " * " + employee.HospitalSalaryMultiplier + "(больн.) = " + result + "/Д";
+        float result = employee.BaseSalary * employee.hospitalSalaryMultiplier;
+        return employee.BaseSalary + " * " + employee.hospitalSalaryMultiplier + "(больн.) = " + result + "/Д";
     }
 }
 public class OvertimeSalaryStatus : SalaryStatus
 {
     public bool IsActive => true;
     public bool Overtime => true;
-    public string StateName => "Сверхурочно";
+    public string StateName => "Базовый оклад + Сверхурочные";
     public float CalculateSalary(Employee employee)
     {
-        return employee.BaseSalary * employee.OvertimeSalaryMultiplier;
+        return employee.BaseSalary * Employee.overtimeSalaryMultiplier;
     }
     public string GetSalaryInfo(Employee employee)
     {
-        float result = employee.BaseSalary * employee.OvertimeSalaryMultiplier;
-        return employee.BaseSalary + " * " + employee.OvertimeSalaryMultiplier + "(сверх.) = " + result + "/Д";
+        float result = employee.BaseSalary * Employee.overtimeSalaryMultiplier;
+        return employee.BaseSalary + " * " + Employee.overtimeSalaryMultiplier + "(сверх.) = " + result + "/Д";
     }
 }
 

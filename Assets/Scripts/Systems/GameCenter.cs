@@ -16,6 +16,7 @@ public class GameCenter : MonoBehaviour
         OvertimeSelectorPanel overtimeSelectorPanel = FindObjectOfType<OvertimeSelectorPanel>();
         EmployeeTaskSystem employeeTaskSystem = FindObjectOfType<EmployeeTaskSystem>();
         TaskPanel taskPanel = FindObjectOfType<TaskPanel>();
+        ProjectDaysPanel projectDaysPanel = FindObjectOfType<ProjectDaysPanel>();
 
         GameUICenter.messageQueue = messageQueue;
         messagePanel.SubscribeEvents(messageQueue);
@@ -28,6 +29,8 @@ public class GameCenter : MonoBehaviour
         employeeSystem.SubscribeEvents(timeSystem);
         resourcePanel.SubscribeEvents(financeSystem, employeeSystem);
         employeeTaskSystem.SubscribeEvents(employeeSystem, timeSystem);
+        projectDaysPanel.SubscribeEvents(timeSystem);
+        timeSystem.SubscribeEvents(employeeTaskSystem, financeSystem);
 
 
         overtimeSelectorPanel.SetUp();

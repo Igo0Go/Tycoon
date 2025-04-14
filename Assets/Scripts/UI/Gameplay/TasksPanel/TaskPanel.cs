@@ -32,11 +32,21 @@ public class TaskPanel : MonoBehaviour, IUIPanel
         HidePanel();
     }
 
+    public void OnPanelButtonClick()
+    {
+        if(panel.activeSelf)
+        {
+            HidePanel();
+        }
+        else
+        {
+            ShowPanel();
+        }
+    }
     public void HidePanel()
     {
         panel.SetActive(false);
     }
-
     public void ShowPanel()
     {
         panel.SetActive(true);

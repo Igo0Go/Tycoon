@@ -31,8 +31,6 @@ public class EmployeeUiItem : MonoBehaviour
         emp.employeeChanged -= UpdateInfo;
     }
 
-
-
     public void OnClick()
     {
         OnEmployeeClick?.Invoke(emp);
@@ -40,8 +38,13 @@ public class EmployeeUiItem : MonoBehaviour
 
     private void UpdateInfo()
     {
-        nameText.text = emp.Name;
-        stateText.text = recrut ? "Стажёр. Стоимость привлечения: " : emp.State;
-        paymentText.text = recrut? emp.CostOfAttracting.ToString() : emp.GetSalaryInfo();
+        nameText.text = emp.Name + " " + emp.WorkExperience;
+        stateText.text = emp.DayState;
+        paymentText.text = emp.GetSalaryInfo() + " " + emp.SalaryState;
+
+        if(recrut)
+        {
+            paymentText.text += "\nСтоимость привлечения: " + emp.CostOfAttracting;
+        }
     }
 }

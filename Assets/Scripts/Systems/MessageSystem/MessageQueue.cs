@@ -55,6 +55,7 @@ public class MessageQueue : MonoBehaviour
         {
             if(currentMessage == null)
             {
+                TimeSettings.TimeSpeedMultiplier = 1;
                 currentMessage = messages[0];
                 messages.RemoveAt(0);
                 messageReceived?.Invoke(currentMessage);

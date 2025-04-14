@@ -7,6 +7,18 @@ public class EmployeeTask
 
     public int AllTaskTime { get; private set; }
     public int CompleteTaskTime { get; set; }
+    public int TestingTime
+    {
+        get
+        {
+            int result = AllTaskTime / 10;
+            if (result < 15)
+            {
+                result = 15;
+            }
+            return result;
+        }
+    }
     public int Progress => CalculateProgressPercent();
 
     public EmployeeTaskType Type { get; private set; }
@@ -75,8 +87,27 @@ public class EmployeeTask
         CompleteTaskTime = 0;
     }
 
+    public bool IsReady()
+    {
+        if (Testing)
+        {
+            return CompleteTaskTime >= TestingTime;
+        }
+        else
+        {
+            return CompleteTaskTime >= AllTaskTime;
+        }
+    }
+
     private int CalculateProgressPercent()
     {
-        return (int)Mathf.Clamp(Mathf.Round(CompleteTaskTime / AllTaskTime * 100), 0, 100);
+        if(Testing)
+        {
+            return (int)Mathf.Clamp(Mathf.Round(CompleteTaskTime / TestingTime * 100), 0, 100);
+        }
+        else
+        {
+            return (int)Mathf.Clamp(Mathf.Round(CompleteTaskTime / AllTaskTime * 100), 0, 100);
+        }
     }
 }

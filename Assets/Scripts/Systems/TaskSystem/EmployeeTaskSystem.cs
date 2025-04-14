@@ -14,11 +14,24 @@ public class EmployeeTaskSystem : MonoBehaviour
     public event Action<EmployeeTask> incorrectTaskFound;
     public event Action<EmployeeTask> taskToBaclog;
     public event Action taskTick;
+    public event Action projectComplete;
+
+    private bool endOfProject = false;
 
     public void SetUp()
     {
         Backlog.AddRange(taskDB.GetEmployeeTasks());
     }
+
+    public void AddTasksToBackLog(List<EmployeeTask> tasks)
+    {
+        Backlog.AddRange(tasks);
+        foreach (EmployeeTask task in tasks)
+        {
+            taskToBaclog?.Invoke(task);
+        }
+    }
+
     public void SubscribeEvents(EmployeeSystem employeeSystem, TimeSystem timeSystem)
     {
         employeeSystem.teamChanged += OnEmployeeListChanged;
@@ -56,7 +69,7 @@ public class EmployeeTaskSystem : MonoBehaviour
             }
             else if(e.CurrentTask != null)
             {
-                if(e.CurrentTask.Progress >= 100)
+                if(e.CurrentTask.IsReady())
                 {
                     GameUICenter.messageQueue.Log(e.Name + " выполняет задачу " + e.CurrentTask.Name);
           
@@ -74,6 +87,7 @@ public class EmployeeTaskSystem : MonoBehaviour
 
                         employeesAndTasks[e].Remove(e.CurrentTask);
                         e.CurrentTask = null;
+                        CheckProgress();
                     }
                     else
                     {
@@ -81,6 +95,7 @@ public class EmployeeTaskSystem : MonoBehaviour
                         Backlog.Add(e.CurrentTask);
                         taskToBaclog?.Invoke(e.CurrentTask);
                         employeesAndTasks[e].Remove(e.CurrentTask);
+
                         e.CurrentTask = null;
                     }
                 }
@@ -104,6 +119,11 @@ public class EmployeeTaskSystem : MonoBehaviour
             employeesAndTasks[employee].Remove(task);
             Backlog.Add(task);
         }
+    }
+
+    public void PrepareEndProject()
+    {
+        endOfProject = true;
     }
 
     private void OnEmployeeListChanged(List<Employee> employees)
@@ -135,6 +155,38 @@ public class EmployeeTaskSystem : MonoBehaviour
             {
                 taskToBaclog?.Invoke(item);
             }
+        }
+    }
+
+    private void CheckProgress()
+    {
+        if(Backlog.Count > 0)
+        {
+            return;
+        }
+
+        foreach (var task in employeesAndTasks)
+        {
+            if (task.Value.Count > 0)
+            {
+                return;
+            }
+
+            if(task.Key.CurrentTask != null)
+            {
+                return;
+            }
+        }
+
+        if(endOfProject)
+        {
+            GameUICenter.messageQueue.PrepareMessage("Успех!", "Вы справились со всеми задачами!");
+            projectComplete?.Invoke();
+        }
+        else
+        {
+            GameUICenter.messageQueue.PrepareMessage("Успех!", "Все текущие задачи выполнены. Но пока ждём." +
+                " Надо показать текущий прогресс заказчику. Может, будут правки!");
         }
     }
 }

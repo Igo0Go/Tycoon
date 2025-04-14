@@ -28,8 +28,16 @@ public class TaskCardUIItem : TooltipElement
 
     private void DrawTaskinfo()
     {
-        taskNameText.text = Task.Name + (Task.Testing ? " test[" + Task.IsCorrectTask + "]": "");
+        taskNameText.text = Task.Name + (Task.Testing ? " T[" + (Task.IsCorrectTask? "+" : "x") + "]": "");
         taskTypeText.text = Task.Type.ToString();
-        taskTimeToCompleteText.text = (Task.AllTaskTime / 60) + " ÷. " + (Task.AllTaskTime % 60) + "ì.";
+
+        if(Task.Testing)
+        {
+            taskTimeToCompleteText.text = (Task.TestingTime / 60) + " ÷. " + (Task.TestingTime % 60) + "ì.";
+        }
+        else
+        {
+            taskTimeToCompleteText.text = (Task.AllTaskTime / 60) + " ÷. " + (Task.AllTaskTime % 60) + "ì.";
+        }
     }
 }

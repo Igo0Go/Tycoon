@@ -99,6 +99,7 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
 
         this.financeSystem = financeSystem;
         financeSystem.currentSummChanged += OnCurrentSumChanged;
+        financeSystem.currentRentCostChanged += RedrawFinanceInfo;
         this.employeeSystem = employeeSystem;
         employeeSystem.teamChanged += RedrawEmployeesStatsPanel;
         employeeSystem.teamChanged += (e)=> RedrawFinanceInfo();
@@ -111,6 +112,32 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
         stressSlider.maxValue = fatigueSlider.maxValue = 100;
         HidePanel();
     }
+
+    public void OnResourcePanelButtonClick()
+    {
+        if(resurcePanel.activeSelf)
+        {
+            HidePanel();
+        }
+        else
+        {
+            ShowPanel();
+        }
+    }
+    public void ShowPanel()
+    {
+        resurcePanel.SetActive(true);
+        RedrawFinanceInfo();
+
+        SetDrawMode(EmployeeListDrawMode.team);
+    }
+    public void HidePanel()
+    {
+        CurrentEmployee = null;
+        ClearEmployeeList();
+        resurcePanel.SetActive(false);
+    }
+
 
     public void OnCurrentSumChanged(float newSum)
     {
@@ -134,6 +161,11 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
         currentEmployeeText.text = activeCount + "/" + allCount;
     }
 
+    public void OnDissmissCurrentEmployeeClick()
+    {
+        GameUICenter.messageQueue.PrepareMessage("Неприятный разговор", CurrentEmployee.DissmissSpeach,
+            DissmissCurrentEmployee, () => { });
+    }
     public void DissmissCurrentEmployee()
     {
         employeeSystem.DismissEmployee(CurrentEmployee);
@@ -174,7 +206,15 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
     }
     public void MinusSalaryForCurrentEmployee()
     {
-        CurrentEmployee.MinusSalary(1);
+        if(CurrentEmployee.BaseSalary <= 10)
+        {
+            GameUICenter.messageQueue.PrepareMessage("Недовольные работники", "Я не буду работать за меньшую зарплату. " +
+                "Либо оставляйте как есть. Либо я увольняюсь. Мне собирать вещи?", DissmissCurrentEmployee, () => { });
+        }
+        else
+        {
+            CurrentEmployee.MinusSalary(1);
+        }
     }
     private void OnEmployeeUIItemClick(Employee e)
     {
@@ -240,7 +280,7 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
             stressSlider.value = CurrentEmployee.Stress;
             fatigueSlider.value = CurrentEmployee.Fatigue;
             nameText.text = CurrentEmployee.Name;
-            stateText.text = CurrentEmployee.State;
+            stateText.text = CurrentEmployee.SalaryState;
             paymentText.text = CurrentEmployee.GetSalaryInfo();
         }
     }
@@ -252,27 +292,6 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
         rentText.text = "Аренда помещения: -" + financeSystem.DayRentCosts + "/Д";
         utilityText.text = "Коммунальные услуги: -" + financeSystem.DayUtilityCosts + "/Д";
         employeesPaymentText.text = "Оплата работы сотрудников: -" + financeSystem.DayEmployesPayment + "/Д";
-    }
-
-    public void ShowPanel()
-    {
-        resurcePanel.SetActive(true);
-        RedrawFinanceInfo();
-        if(Mode == EmployeeListDrawMode.recruts)
-        {
-            ShowRecruts(employeeSystem.Recruts);
-        }
-        else
-        {
-            ShowRecruts(employeeSystem.Employees);
-        }
-    }
-
-    public void HidePanel()
-    {
-        CurrentEmployee = null;
-        ClearEmployeeList();
-        resurcePanel.SetActive(false);
     }
 }
 

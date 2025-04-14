@@ -3,10 +3,12 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class EmployeeTaskCardHolder : MonoBehaviour
+public class EmployeeTaskCardHolder : TooltipElement
 {
     [SerializeField]
     private TMP_Text employeeNameText;
+    [SerializeField]
+    private TMP_Text employeeExperienceText;
     [SerializeField]
     private TMP_Text currentTaskNameText;
     [SerializeField]
@@ -44,6 +46,7 @@ public class EmployeeTaskCardHolder : MonoBehaviour
     private void RedrawEmployeeInfo()
     {
         employeeNameText.text = Employee.Name;
+        employeeExperienceText.text = "Опыт работы: " + Employee.WorkExperience;
         OnChangeTask();
     }
 
@@ -52,8 +55,11 @@ public class EmployeeTaskCardHolder : MonoBehaviour
         if (Employee.CurrentTask != null)
         {
             currentTaskNameText.text = Employee.CurrentTask.Name + (Employee.CurrentTask.Testing ? 
-                " test[" + Employee.CurrentTask.IsCorrectTask + "]" : "");
-            currentTaskProgressSlider.maxValue = Employee.CurrentTask.AllTaskTime;
+                " T[" + (Employee.CurrentTask.IsCorrectTask? "+":"x") + "]" : "");
+
+            currentTaskProgressSlider.maxValue = Employee.CurrentTask.Testing? 
+                Employee.CurrentTask.TestingTime : Employee.CurrentTask.AllTaskTime;
+
             OnChangeTaskProgress();
             taskContainer.DestroyCardWithThisTask(Employee.CurrentTask);
         }
@@ -68,8 +74,46 @@ public class EmployeeTaskCardHolder : MonoBehaviour
 
     private void OnChangeTaskProgress()
     {
-        currentTaskProgressText.text = "ещё" +
-    (Employee.CurrentTask.AllTaskTime - Employee.CurrentTask.CompleteTaskTime) + "м.";
+        employeeExperienceText.text = "Опыт работы: " + Employee.WorkExperience;
+
+        int totalTime = 0;
+
+        if(Employee.CurrentTask.Testing)
+        {
+            totalTime = Employee.CurrentTask.TestingTime - Employee.CurrentTask.CompleteTaskTime;
+        }
+        else
+        {
+            totalTime = Employee.CurrentTask.AllTaskTime - Employee.CurrentTask.CompleteTaskTime;
+        }
+
+
+        int hour = totalTime / 60;
+        int minute = totalTime % 60;
+
+        currentTaskProgressText.text = "ещё " + hour + "ч. " + minute + "м.";
         currentTaskProgressSlider.value = Employee.CurrentTask.CompleteTaskTime;
+    }
+
+    protected override string GetStringForTooltip()
+    {
+        string s = Employee.Name + "\n";
+        s += "Опыт работы: " + Employee.WorkExperience + "\n";
+        s += "Усталость: " + Employee.Fatigue + "\n";
+        s += "Стресс: " + Employee.Stress + "\n";
+        s += Employee.DayState + "\n";
+        s += "\n";
+        s += "Оплата: " + Employee.GetSalaryInfo() + "\n";
+        s += "\n";
+        if (Employee.CurrentTask != null)
+        {
+            s += "Текущая задача: " + Employee.CurrentTask.Name + "\n";
+            s += Employee.CurrentTask.Description + "\n";
+            if(Employee.CurrentTask.Testing)
+            {
+                s += "Тестирование";
+            }
+        }
+        return s;
     }
 }

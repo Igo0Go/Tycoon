@@ -6,10 +6,8 @@ public class EmployeeBuilderInfo
     public string name;
     [Min(1)]
     public float baseSalary;
-    [Range(0, 2)]
-    public float overtimeSalaryMultiplier = 2;
-    [Range(0, 2)]
-    public float hospitalSalaryMultiplier = 0.5f;
     [Min(1)]
     public float costOfAttracting = 100;
+    [TextArea(5,10)]
+    public string dissmisSpeach;
 }

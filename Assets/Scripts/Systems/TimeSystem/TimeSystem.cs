@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class TimeSystem : MonoBehaviour
 {
@@ -30,10 +32,17 @@ public class TimeSystem : MonoBehaviour
     [SerializeField]
     private int endDayHour = 0;
 
+    [SerializeField, Min(1)]
+    private int projectDayLimit = 20;
+    [SerializeField]
+    private List<DayEvent> dayEvents = new List<DayEvent>();
+
     public event Action<int> hoursChanged;
     public event Action<int> minutesChanged;
     public event Action<DateTime> dateChanged;
     public event Action<int> spendTime;
+    public event Action<int> currentDayChanged;
+
 
     public event Action startNewDay;
     public event Action startWork;
@@ -105,6 +114,15 @@ public class TimeSystem : MonoBehaviour
     private DayPart currentDayPart;
     private bool useTime;
     private float t = 0;
+    private bool financeLost = false;
+
+    private int currentDayCount = 0;
+
+    public void SubscribeEvents(EmployeeTaskSystem taskSystem, FinanceSystem financeSystem)
+    {
+        taskSystem.projectComplete += () => useTime = false;
+        financeSystem.financeLost += (value) => financeLost = value;
+    }
 
     /// <summary>
     /// Сравнивает поданное время с текущем временем системы
@@ -143,14 +161,20 @@ public class TimeSystem : MonoBehaviour
     {
         CurrentDate = DateTime.Now;
         TimeSettings.TimeSpeed = timeSpeed;
-        StartNewDay();
+        CurrentHour = 9;
+        CurrentMinute = 0;
+        useTime = true;
+        startNewDay?.Invoke();
+        startWork?.Invoke();
+        GameUICenter.messageQueue.PrepareMessage("Новый день!", startDayMessage);
+        CheckDayEvents();
     }
 
     private void Update()
     {
         if (useTime)
         {
-            t += Time.deltaTime * TimeSettings.TimeSpeed;
+            t += Time.deltaTime * TimeSettings.TimeSpeed * TimeSettings.TimeSpeedMultiplier;
 
             if (t >= cycle)
             {
@@ -159,6 +183,7 @@ public class TimeSystem : MonoBehaviour
                 t = 0;
             }
         }
+        ChangeSpeed();
     }
 
     public void StartNewDay()
@@ -172,13 +197,26 @@ public class TimeSystem : MonoBehaviour
         if(CurrentDate.DayOfWeek == DayOfWeek.Friday)
         {
             CurrentDate = CurrentDate.AddDays(3);
+            currentDayCount += 3;
+            currentDayChanged?.Invoke( projectDayLimit - currentDayCount);
         }
         else
         {
             CurrentDate = CurrentDate.AddDays(1);
+            currentDayCount += 1;
+            currentDayChanged?.Invoke(projectDayLimit - currentDayCount);
         }
 
-        GameUICenter.messageQueue.PrepareMessage("Новый день!", startDayMessage);
+        if(currentDayCount > projectDayLimit)
+        {
+            GameUICenter.messageQueue.PrepareMessage("Время вышло!", "Время на выполнение проекта истекло! Конец игры");
+            useTime = false;
+        }
+        else
+        {
+            GameUICenter.messageQueue.PrepareMessage("Новый день!", startDayMessage);
+            CheckDayEvents();
+        }
     }
 
     public void SkipLunch()
@@ -194,6 +232,13 @@ public class TimeSystem : MonoBehaviour
     {
         endDay?.Invoke();
         StartNewDay();
+
+        if(financeLost)
+        {
+            GameUICenter.messageQueue.PrepareMessage("Вот и всё, ребята", "Чуда не случилось. Деньги кончились. " +
+                "И новых средств ждать не стоит. Пора закрываться. \n\n Конец игры");
+            useTime = false;
+        }
     }
 
     public void SkipTimeToThis(int targetHour, int targetMinute)
@@ -267,11 +312,81 @@ public class TimeSystem : MonoBehaviour
             GameUICenter.messageQueue.PrepareMessage("Вы что-то заседелись", endDayMessage, EndDay);
         }
     }
+
+    private void CheckDayEvents()
+    {
+        for (int i = 0; i < dayEvents.Count; i++)
+        {
+            DayEvent currentEvent = dayEvents[i];
+
+            if(currentDayCount >= currentEvent.day)
+            {
+                GameUICenter.messageQueue.PrepareMessage(currentEvent.Header, currentEvent.Message);
+                currentEvent.onDayEvent.Invoke();
+                dayEvents.RemoveAt(i);
+                i--;
+            }
+        }
+    }
+
+    private void ChangeSpeed()
+    {
+        if(Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            TimeSettings.TimeSpeedMultiplier = 1;
+        }
+        else if(Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            TimeSettings.TimeSpeedMultiplier = 2;
+        }
+        else if(Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            TimeSettings.TimeSpeedMultiplier = 4;
+        }
+        else if(Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            TimeSettings.TimeSpeedMultiplier = 10;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha5))
+        {
+            TimeSettings.TimeSpeedMultiplier = 100;
+        }
+    }
+}
+
+[System.Serializable]
+public class DayEvent
+{
+    public string Header;
+    [TextArea(5,10)]
+    public string Message;
+    public int day;
+    public UnityEvent onDayEvent;
 }
 
 public static class TimeSettings
 {
     public static float TimeSpeed = 1;
+
+    public static float TimeSpeedMultiplier
+    {
+        get
+        { 
+            return _timeSpeedMultiplier;
+        }
+        set
+        {
+            _timeSpeedMultiplier = value;
+            timeSpeedChanged?.Invoke(_timeSpeedMultiplier);
+        }
+    }
+    private static float _timeSpeedMultiplier = 1;
+
+    public static void ClearEvents()
+    {
+        timeSpeedChanged = null;
+    }
+    public static event Action<float> timeSpeedChanged;
 }
 
 public enum DayPart

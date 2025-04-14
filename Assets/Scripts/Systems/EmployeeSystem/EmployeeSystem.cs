@@ -49,7 +49,7 @@ public class EmployeeSystem : MonoBehaviour
         timeSystem.startNewDay += AllStartDay;
         timeSystem.startWork += AllToWork;
         timeSystem.startLunch += AllToLunch;
-        timeSystem.endWork += AllEndWork;
+        timeSystem.endWork += EmployeesGoHome;
         timeSystem.endDay += AllGoHome;
 
         teamChanged?.Invoke(Employees);
@@ -99,7 +99,7 @@ public class EmployeeSystem : MonoBehaviour
         for (int i = 0; i < Employees.Count; i++)
         {
             Employee e = Employees[i];
-            if(e.EmployeeInTheTeam())
+            if(e.EmployeeWantFireCheck())
             {
                 e.SetBaseSalaryStatus();
             }
@@ -120,12 +120,12 @@ public class EmployeeSystem : MonoBehaviour
         }
         teamChanged?.Invoke(Employees);
     }
-    private void AllEndWork()
+    private void EmployeesGoHome()
     {
         foreach (Employee e in Employees)
         {
             if(!e.OverTime)
-                e.StopWorkTime();
+                e.GoHome();
         }
         teamChanged?.Invoke(Employees);
     }
@@ -135,7 +135,7 @@ public class EmployeeSystem : MonoBehaviour
         {
             e.EndDayResult();
             e.SetBaseSalaryStatus();
-            e.StopWorkTime();
+            e.GoHome();
         }
         teamChanged?.Invoke(Employees);
     }
@@ -143,7 +143,7 @@ public class EmployeeSystem : MonoBehaviour
     {
         foreach(Employee e in Employees)
         {
-            e.StopWorkTime();
+            e.ToLunch();
         }
     }
 
