@@ -11,17 +11,15 @@ public class ProjectDaysPanel : MonoBehaviour, IUIPanel
 
     public void SubscribeEvents(TimeSystem timeSystem)
     {
-        timeSystem.currentDayChanged += RedrawInfo;
+        timeSystem.ProjectDayLimitChanged += RedrawInfo;
     }
-
-    public void HidePanel()
-    {
-        panel.SetActive(false);
-    }
-
     public void ShowPanel()
     {
         panel.SetActive(true);
+    }
+    public void HidePanel()
+    {
+        panel.SetActive(false);
     }
 
     public void RedrawInfo(int days)

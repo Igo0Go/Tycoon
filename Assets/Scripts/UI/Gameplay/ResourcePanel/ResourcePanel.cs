@@ -101,11 +101,11 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
         financeSystem.currentSummChanged += OnCurrentSumChanged;
         financeSystem.currentRentCostChanged += RedrawFinanceInfo;
         this.employeeSystem = employeeSystem;
-        employeeSystem.teamChanged += RedrawEmployeesStatsPanel;
-        employeeSystem.teamChanged += (e)=> RedrawFinanceInfo();
+        employeeSystem.TeamChanged += RedrawEmployeesStatsPanel;
+        employeeSystem.TeamChanged += (e)=> RedrawFinanceInfo();
 
-        employeeSystem.teamChanged += ShowEmployees;
-        employeeSystem.recrutsChanged += ShowRecruts;
+        employeeSystem.TeamChanged += ShowEmployees;
+        employeeSystem.RecrutsChanged += ShowRecruts;
     }
     public void SetUp()
     {
@@ -163,8 +163,15 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
 
     public void OnDissmissCurrentEmployeeClick()
     {
-        GameUICenter.messageQueue.PrepareMessage("Неприятный разговор", CurrentEmployee.DissmissSpeach,
-            DissmissCurrentEmployee, () => { });
+        if(CurrentEmployee.EmployeeSpeachPack.TryGetDissmissSpeach(out MessagePanelPack pack))
+        {
+            GameUICenter.messageQueue.PrepareMessage(pack.Header, pack.Message,
+                DissmissCurrentEmployee, () => { });
+        }
+        else
+        {
+            DissmissCurrentEmployee();
+        }
     }
     public void DissmissCurrentEmployee()
     {
@@ -246,10 +253,10 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
         {
             if (CurrentEmployee != null)
             {
-                CurrentEmployee.employeeChanged -= RedrawCurrentEmployeeInfo;
+                CurrentEmployee.EmployeeInfoChanged -= RedrawCurrentEmployeeInfo;
             }
             CurrentEmployee = e;
-            e.employeeChanged += RedrawCurrentEmployeeInfo;
+            e.EmployeeInfoChanged += RedrawCurrentEmployeeInfo;
             RedrawCurrentEmployeeInfo();
         }
     }
@@ -280,7 +287,7 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
             stressSlider.value = CurrentEmployee.Stress;
             fatigueSlider.value = CurrentEmployee.Fatigue;
             nameText.text = CurrentEmployee.Name;
-            stateText.text = CurrentEmployee.SalaryState;
+            stateText.text = CurrentEmployee.SalaryStrategyName;
             paymentText.text = CurrentEmployee.GetSalaryInfo();
         }
     }

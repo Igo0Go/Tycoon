@@ -4,17 +4,15 @@ using UnityEngine;
 
 public class EmployeeTaskSystem : MonoBehaviour
 {
-    [SerializeField]
     public TaskDB taskDB;
 
-    private Dictionary<Employee, List<EmployeeTask>> employeesAndTasks = 
-        new Dictionary<Employee, List<EmployeeTask>>();
+    private readonly Dictionary<Employee, List<EmployeeTask>> employeesAndTasks = 
+        new();
     public List<EmployeeTask> Backlog { get; private set; }  = new List<EmployeeTask>();
 
-    public event Action<EmployeeTask> incorrectTaskFound;
-    public event Action<EmployeeTask> taskToBaclog;
-    public event Action taskTick;
-    public event Action projectComplete;
+    public event Action<EmployeeTask> IncorrectTaskFound;
+    public event Action<EmployeeTask> TaskToBaclog;
+    public event Action ProjectComplete;
 
     private bool endOfProject = false;
 
@@ -28,15 +26,15 @@ public class EmployeeTaskSystem : MonoBehaviour
         Backlog.AddRange(tasks);
         foreach (EmployeeTask task in tasks)
         {
-            taskToBaclog?.Invoke(task);
+            TaskToBaclog?.Invoke(task);
         }
     }
 
     public void SubscribeEvents(EmployeeSystem employeeSystem, TimeSystem timeSystem)
     {
-        employeeSystem.teamChanged += OnEmployeeListChanged;
-        employeeSystem.dismissEmployee += OnDismissEmployee;
-        timeSystem.spendTime += OnSkipTime;
+        employeeSystem.TeamChanged += OnEmployeeListChanged;
+        employeeSystem.DismissEmployeeEvent += OnDismissEmployee;
+        timeSystem.SpendTime += OnSkipTime;
     }
 
     private void OnSkipTime(int minutes)
@@ -79,8 +77,8 @@ public class EmployeeTaskSystem : MonoBehaviour
                         if(!e.CurrentTask.EndTestingThisTask(e))
                         {
                             Backlog.Add(e.CurrentTask);
-                            taskToBaclog?.Invoke(e.CurrentTask);
-                            incorrectTaskFound?.Invoke(e.CurrentTask);
+                            TaskToBaclog?.Invoke(e.CurrentTask);
+                            IncorrectTaskFound?.Invoke(e.CurrentTask);
                             GameUICenter.messageQueue.Log(e.Name + " сообщает, что задача " + 
                                 e.CurrentTask.Name + " выполнена некорректно.");
                         }
@@ -93,7 +91,7 @@ public class EmployeeTaskSystem : MonoBehaviour
                     {
                         e.CurrentTask.EndWorkForThisTask(e);
                         Backlog.Add(e.CurrentTask);
-                        taskToBaclog?.Invoke(e.CurrentTask);
+                        TaskToBaclog?.Invoke(e.CurrentTask);
                         employeesAndTasks[e].Remove(e.CurrentTask);
 
                         e.CurrentTask = null;
@@ -140,7 +138,7 @@ public class EmployeeTaskSystem : MonoBehaviour
     {
         if(employeesAndTasks.ContainsKey(employee))
         {
-            List<EmployeeTask> tasks = new List<EmployeeTask>();
+            List<EmployeeTask> tasks = new();
             
             if(employee.CurrentTask != null)
             {
@@ -153,7 +151,7 @@ public class EmployeeTaskSystem : MonoBehaviour
 
             foreach (var item in tasks)
             {
-                taskToBaclog?.Invoke(item);
+                TaskToBaclog?.Invoke(item);
             }
         }
     }
@@ -181,7 +179,7 @@ public class EmployeeTaskSystem : MonoBehaviour
         if(endOfProject)
         {
             GameUICenter.messageQueue.PrepareMessage("Успех!", "Вы справились со всеми задачами!");
-            projectComplete?.Invoke();
+            ProjectComplete?.Invoke();
         }
         else
         {

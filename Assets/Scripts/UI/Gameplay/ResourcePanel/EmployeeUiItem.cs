@@ -22,13 +22,13 @@ public class EmployeeUiItem : MonoBehaviour
     {
         this.recrut = recrut;
         emp = employee;
-        emp.employeeChanged += UpdateInfo;
+        emp.EmployeeInfoChanged += UpdateInfo;
         buttonText.text = recrut ? "Нанять" : "Детали";
         UpdateInfo();
     }
     public void OnDestroy()
     {
-        emp.employeeChanged -= UpdateInfo;
+        emp.EmployeeInfoChanged -= UpdateInfo;
     }
 
     public void OnClick()
@@ -38,9 +38,9 @@ public class EmployeeUiItem : MonoBehaviour
 
     private void UpdateInfo()
     {
-        nameText.text = emp.Name + " " + emp.WorkExperience;
+        nameText.text = emp.Name + " " + emp.ExperienceHours;
         stateText.text = emp.DayState;
-        paymentText.text = emp.GetSalaryInfo() + " " + emp.SalaryState;
+        paymentText.text = emp.GetSalaryInfo() + " " + emp.SalaryStrategyName;
 
         if(recrut)
         {

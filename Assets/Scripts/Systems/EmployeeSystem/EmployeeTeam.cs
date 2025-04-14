@@ -5,22 +5,17 @@ using UnityEngine;
 public class EmployeeTeam : ScriptableObject
 {
     [SerializeField]
-    private int stressMultiplier = 1;
-    [SerializeField]
-    private int fatigueMultiplier = 1;
-    [SerializeField]
     private List<EmployeeBuilderInfo> _employees;
     [SerializeField]
     private List<EmployeeBuilderInfo> _recruts;
 
     public List<Employee> GetEmployees()
     {
-        List<Employee> result = new List<Employee>();
+        List<Employee> result = new();
 
         foreach(EmployeeBuilderInfo info in _employees)
         {
             Employee e = EmployeeBuilder.GetEmployee(info);
-            e.SetCharacteristicMultiplier(stressMultiplier, fatigueMultiplier);
             result.Add(e);
         }
 
@@ -29,7 +24,7 @@ public class EmployeeTeam : ScriptableObject
 
     public List<Employee> GetRecruts()
     {
-        List<Employee> result = new List<Employee>();
+        List<Employee> result = new();
 
         foreach (EmployeeBuilderInfo info in _recruts)
         {

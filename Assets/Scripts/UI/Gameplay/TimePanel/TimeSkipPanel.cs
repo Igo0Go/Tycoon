@@ -21,7 +21,7 @@ public class TimeSkipPanel : MonoBehaviour, IUIPanel
     public void SubscribeEvents(TimeSystem timeSystem)
     {
         this.timeSystem = timeSystem;
-        timeSystem.minutesChanged += (i)=> CheckButtonActive();
+        timeSystem.MinuteChanged += (i)=> CheckButtonActive();
         hoursInputField.onEndEdit.AddListener(OnInputFieldEndEdit);
         minutesInputField.onEndEdit.AddListener(OnInputFieldEndEdit);
     }
@@ -70,10 +70,18 @@ public class TimeSkipPanel : MonoBehaviour, IUIPanel
     public void SkipTime()
     {
         currentHour = Mathf.Clamp(int.Parse(hoursInputField.text), 0, TimeSystem.hourCycle - 1);
-        currentMinute = Mathf.Clamp(int.Parse(minutesInputField.text), 0, TimeSystem.cycle - 1);
+        currentMinute = Mathf.Clamp(int.Parse(minutesInputField.text), 0, TimeSystem.minuteCycle - 1);
 
         timeSystem.SkipTimeToThis(currentHour, currentMinute);
         panelObject.SetActive(false);
+    }
+    private void ClampTime()
+    {
+        currentHour = Mathf.Clamp(int.Parse(hoursInputField.text), 0, TimeSystem.hourCycle - 1);
+        currentMinute = Mathf.Clamp(int.Parse(minutesInputField.text), 0, TimeSystem.minuteCycle - 1);
+
+        hoursInputField.text = currentHour.ToString();
+        minutesInputField.text = currentMinute.ToString();
     }
 
     private void SetHourTextForSkipPanel(int hours)
@@ -95,20 +103,10 @@ public class TimeSkipPanel : MonoBehaviour, IUIPanel
         CheckButtonActive();
     }
 
-    private void ClampTime()
-    {
-        currentHour = Mathf.Clamp(int.Parse(hoursInputField.text), 0, TimeSystem.hourCycle - 1);
-        currentMinute = Mathf.Clamp(int.Parse(minutesInputField.text), 0, TimeSystem.cycle - 1);
-
-        hoursInputField.text = currentHour.ToString();
-        minutesInputField.text = currentMinute.ToString();
-    }
-
     private bool CheckSkipTime()
     {
         return timeSystem.EqulasTime(currentHour, currentMinute) > 0;
     }
-
     private void CheckButtonActive()
     {
         okButton.interactable = CheckSkipTime();

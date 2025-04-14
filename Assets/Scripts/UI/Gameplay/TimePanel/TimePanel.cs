@@ -17,33 +17,36 @@ public class TimePanel : MonoBehaviour
 
     private TimeSystem timeSystem;
 
+    public void SubscribeEvents(TimeSystem timeSystem)
+    {
+        this.timeSystem = timeSystem;
+        timeSystem.HoursChanged += OnHoursChanged;
+        timeSystem.MinuteChanged += OnMinutesChanged;
+        timeSystem.StartWork += () => OnDayPartChanged("Работа");
+        timeSystem.StartLunch += () => OnDayPartChanged("Обед");
+        timeSystem.EndWork += () => OnDayPartChanged("Отдых");
+        timeSystem.StartOvertime += OnStartOvertime;
+        timeSystem.DateChanged += OnDateChanged;
+        timeSystem.NewDayBeginning += () => goHomeButton.SetActive(false);
+
+        TimeSettings.ClearEvents();
+        TimeSettings.TimeSpeedChanged += OnChangeTimeSpeed;
+    }
     public void SetUp()
     {
         goHomeButton.SetActive(false);
     }
-
-    public void SubscribeEvents(TimeSystem timeSystem)
+    public void OnGoHomeButtonClick()
     {
-        this.timeSystem = timeSystem;
-        timeSystem.hoursChanged += OnHoursChanged;
-        timeSystem.minutesChanged += OnMinutesChanged;
-        timeSystem.startWork += ()=> OnDayPartChanged("Работа");
-        timeSystem.startLunch += () => OnDayPartChanged("Обед");
-        timeSystem.endWork += () => OnDayPartChanged("Отдых");
-        timeSystem.startOvertime += OnStartOvertime;
-        timeSystem.dateChanged += OnDateChanged;
-        timeSystem.startNewDay += () => goHomeButton.SetActive(false);
-
-        TimeSettings.ClearEvents();
-        TimeSettings.timeSpeedChanged += OnChangeTimeSpeed;
+        timeSystem.EndDay();
+        goHomeButton.SetActive(false);
     }
 
     private void OnHoursChanged(int hour)
     {
         int minute = timeSystem.CurrentMinute;
 
-        string minutes = string.Empty;
-
+        string minutes;
         if (minute < 10)
         {
             minutes = "0" + minute;
@@ -55,11 +58,9 @@ public class TimePanel : MonoBehaviour
 
         timerText.text = hour.ToString() + ":" + minutes;
     }
-
     private void OnMinutesChanged(int minute)
     {
-        string minutes = string.Empty;
-
+        string minutes;
         if (minute < 10)
         {
             minutes = "0" + minute;
@@ -71,12 +72,10 @@ public class TimePanel : MonoBehaviour
 
         timerText.text = timeSystem.CurrentHour + ":" + minutes;
     }
-
     private void OnDayPartChanged(string dayPart)
     {
         dayPartText.text = dayPart;
     }
-
     private void OnDateChanged(DateTime date)
     {
         string dayOfWeek = string.Empty;
@@ -109,21 +108,13 @@ public class TimePanel : MonoBehaviour
 
         dateText.text = dayOfWeek + "\n" + date.Day + "." + date.Month + "." + date.Year;
     }
-
     private void OnStartOvertime()
     {
         goHomeButton.SetActive(true);
     }
-
     private void OnChangeTimeSpeed(float speed) 
     {
         timeSpeedText.text = "X" + speed.ToString();
-    }
-
-    public void OnGoHomeButtonClick()
-    {
-        timeSystem.EndDay();
-        goHomeButton.SetActive(false);
     }
 }
 

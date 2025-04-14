@@ -8,6 +8,9 @@ public class EmployeeBuilderInfo
     public float baseSalary;
     [Min(1)]
     public float costOfAttracting = 100;
-    [TextArea(5,10)]
-    public string dissmisSpeach;
+    [Min(1)]
+    public int experienceInHour = 0;
+
+    public EmployeeStatsPack statsPack;
+    public EmployeeSpeachPack speachPack;
 }

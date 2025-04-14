@@ -17,10 +17,7 @@ public class EmployeeSystem : MonoBehaviour
     {
         get
         {
-            if(_employees == null)
-            {
-                _employees = team.GetEmployees();
-            }
+            _employees ??= team.GetEmployees();
             return _employees;
         }
     }
@@ -30,68 +27,65 @@ public class EmployeeSystem : MonoBehaviour
     {
         get
         {
-            if (_recruts == null)
-            {
-                _recruts = team.GetRecruts();
-            }
+            _recruts ??= team.GetRecruts();
             return _recruts;
         }
     }
     private List<Employee> _recruts;
 
-    public event Action<List<Employee>> teamChanged;
-    public event Action<List<Employee>> recrutsChanged;
-    public event Action<Employee> dismissEmployee;
-    public event Action<Employee> newEmployee;
+    public event Action<List<Employee>> TeamChanged;
+    public event Action<List<Employee>> RecrutsChanged;
+    public event Action<Employee> DismissEmployeeEvent;
+    public event Action<Employee> NewEmployee;
 
     public void SubscribeEvents(TimeSystem timeSystem)
     {
-        timeSystem.startNewDay += AllStartDay;
-        timeSystem.startWork += AllToWork;
-        timeSystem.startLunch += AllToLunch;
-        timeSystem.endWork += EmployeesGoHome;
-        timeSystem.endDay += AllGoHome;
+        timeSystem.NewDayBeginning += AllStartDay;
+        timeSystem.StartWork += AllToWork;
+        timeSystem.StartLunch += AllToLunch;
+        timeSystem.EndWork += EmployeesGoHome;
+        timeSystem.EndOfDay += AllGoHome;
 
-        teamChanged?.Invoke(Employees);
+        TeamChanged?.Invoke(Employees);
 
         foreach (Employee e in Employees)
         {
-            e.employeeChanged += OnEmployeeChanged;
-            e.employeeMaxFatigue += OnEmployeeMaxFatigue;
-            e.employeeMaxStress += OnEmployeeMaxStress;
+            e.EmployeeInfoChanged += OnEmployeeChanged;
+            e.EmployeeMaxFatigue += OnEmployeeMaxFatigue;
+            e.EmployeeMaxStress += OnEmployeeMaxStress;
         }
         foreach (Employee e in Recruts)
         {
-            e.employeeRecruting += AddRecrutToTeam;
+            e.EmployeeRecruting += AddRecrutToTeam;
         }
     }
     public void SetUp()
     {
-        teamChanged?.Invoke(Employees);
+        TeamChanged?.Invoke(Employees);
     }
 
     public void DismissEmployee(Employee employee)
     {
         Employees.Remove(employee);
-        teamChanged?.Invoke(Employees);
-        dismissEmployee?.Invoke(employee);
+        TeamChanged?.Invoke(Employees);
+        DismissEmployeeEvent?.Invoke(employee);
     }
 
     public void AddRecrutToTeam(Employee e)
     {
-        e.employeeRecruting -= AddRecrutToTeam;
+        e.EmployeeRecruting -= AddRecrutToTeam;
 
         Recruts.Remove(e);
         Employees.Add(e);
 
-        e.employeeChanged += OnEmployeeChanged;
-        e.employeeMaxFatigue += OnEmployeeMaxFatigue;
-        e.employeeMaxStress += OnEmployeeMaxStress;
+        e.EmployeeInfoChanged += OnEmployeeChanged;
+        e.EmployeeMaxFatigue += OnEmployeeMaxFatigue;
+        e.EmployeeMaxStress += OnEmployeeMaxStress;
 
-        teamChanged?.Invoke(Employees);
-        recrutsChanged?.Invoke(Recruts);
-        newEmployee?.Invoke(e);
-        e.ToWork();
+        TeamChanged?.Invoke(Employees);
+        RecrutsChanged?.Invoke(Recruts);
+        NewEmployee?.Invoke(e);
+        e.GoToWork();
     }
 
     private void AllStartDay()
@@ -99,7 +93,7 @@ public class EmployeeSystem : MonoBehaviour
         for (int i = 0; i < Employees.Count; i++)
         {
             Employee e = Employees[i];
-            if(e.EmployeeWantFireCheck())
+            if(e.EmployeeMaxStatsCheck())
             {
                 e.SetBaseSalaryStatus();
             }
@@ -109,16 +103,23 @@ public class EmployeeSystem : MonoBehaviour
                 i--;
             }
         }
-        teamChanged?.Invoke(Employees);
+        TeamChanged?.Invoke(Employees);
     }
     private void AllToWork()
     {
         foreach (Employee e in Employees)
         {
             e.SetBaseSalaryStatus();
-            e.ToWork();
+            e.GoToWork();
         }
-        teamChanged?.Invoke(Employees);
+        TeamChanged?.Invoke(Employees);
+    }
+    private void AllToLunch()
+    {
+        foreach (Employee e in Employees)
+        {
+            e.GoToLunch();
+        }
     }
     private void EmployeesGoHome()
     {
@@ -127,7 +128,7 @@ public class EmployeeSystem : MonoBehaviour
             if(!e.OverTime)
                 e.GoHome();
         }
-        teamChanged?.Invoke(Employees);
+        TeamChanged?.Invoke(Employees);
     }
     private void AllGoHome()
     {
@@ -137,19 +138,12 @@ public class EmployeeSystem : MonoBehaviour
             e.SetBaseSalaryStatus();
             e.GoHome();
         }
-        teamChanged?.Invoke(Employees);
-    }
-    private void AllToLunch()
-    {
-        foreach(Employee e in Employees)
-        {
-            e.ToLunch();
-        }
+        TeamChanged?.Invoke(Employees);
     }
 
     private void OnEmployeeChanged()
     {
-        teamChanged?.Invoke(Employees);
+        TeamChanged?.Invoke(Employees);
     }
     private void OnEmployeeMaxStress(Employee e)
     {

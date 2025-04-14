@@ -4,17 +4,17 @@ using UnityEngine;
 
 public class MessageQueue : MonoBehaviour
 {
-    public event Action<MessageInfo> messageReceived;
-    public event Action noMoreMessages;
-    public event Action<string> newLog;
+    public event Action<MessageInfo> MessageReceived;
+    public event Action NoMoreMessages;
+    public event Action<string> NewLog;
 
     private MessageInfo currentMessage;
 
-    private List<MessageInfo> messages = new List<MessageInfo>();
+    private readonly List<MessageInfo> messages = new();
 
     public void Log(string text)
     {
-        newLog?.Invoke(text);
+        NewLog?.Invoke(text);
     }
 
     public void SubscribeEvents(MessagePanel panel)
@@ -39,12 +39,14 @@ public class MessageQueue : MonoBehaviour
 
     public void PrepareMessage(string header, string message, Action yesAction, Action noAction, Action okAction)
     {
-        MessageInfo info = new MessageInfo();
-        info.Header = header;
-        info.Message = message;
-        info.yesAction = yesAction;
-        info.noAction = noAction;
-        info.okAction = okAction;
+        MessageInfo info = new()
+        {
+            Header = header,
+            Message = message,
+            yesAction = yesAction,
+            noAction = noAction,
+            okAction = okAction
+        };
         messages.Add(info);
         CheckMesageQueue();
     }
@@ -58,12 +60,12 @@ public class MessageQueue : MonoBehaviour
                 TimeSettings.TimeSpeedMultiplier = 1;
                 currentMessage = messages[0];
                 messages.RemoveAt(0);
-                messageReceived?.Invoke(currentMessage);
+                MessageReceived?.Invoke(currentMessage);
             }
         }
         else
         {
-            noMoreMessages?.Invoke();
+            NoMoreMessages?.Invoke();
         }
     }
 
@@ -72,4 +74,12 @@ public class MessageQueue : MonoBehaviour
         currentMessage = null;
         CheckMesageQueue();
     }
+}
+
+[Serializable]
+public class MessagePanelPack
+{
+    public string Header;
+    [TextArea(5, 10)]
+    public string Message;
 }

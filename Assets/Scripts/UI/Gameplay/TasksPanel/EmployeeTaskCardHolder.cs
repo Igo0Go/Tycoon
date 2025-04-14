@@ -26,8 +26,8 @@ public class EmployeeTaskCardHolder : TooltipElement
     public void Init(Employee employee)
     {
         this.Employee = employee;
-        employee.doTask += OnChangeTaskProgress;
-        employee.taskChanged += OnChangeTask;
+        employee.DoTask += OnChangeTaskProgress;
+        employee.TaskChanged += OnChangeTask;
         taskContainer.taskAdd += AddTaskToQueue;
         taskContainer.taskRemove += RemoveTaskForthisEmployee;
         RedrawEmployeeInfo();
@@ -46,7 +46,7 @@ public class EmployeeTaskCardHolder : TooltipElement
     private void RedrawEmployeeInfo()
     {
         employeeNameText.text = Employee.Name;
-        employeeExperienceText.text = "Опыт работы: " + Employee.WorkExperience;
+        employeeExperienceText.text = "Опыт работы: " + Employee.ExperienceHours;
         OnChangeTask();
     }
 
@@ -74,7 +74,7 @@ public class EmployeeTaskCardHolder : TooltipElement
 
     private void OnChangeTaskProgress()
     {
-        employeeExperienceText.text = "Опыт работы: " + Employee.WorkExperience;
+        employeeExperienceText.text = "Опыт работы: " + Employee.ExperienceHours;
 
         int totalTime = 0;
 
@@ -98,7 +98,7 @@ public class EmployeeTaskCardHolder : TooltipElement
     protected override string GetStringForTooltip()
     {
         string s = Employee.Name + "\n";
-        s += "Опыт работы: " + Employee.WorkExperience + "\n";
+        s += "Опыт работы: " + Employee.ExperienceHours + "\n";
         s += "Усталость: " + Employee.Fatigue + "\n";
         s += "Стресс: " + Employee.Stress + "\n";
         s += Employee.DayState + "\n";

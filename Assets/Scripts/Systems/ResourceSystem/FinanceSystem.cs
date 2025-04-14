@@ -77,7 +77,7 @@ public class FinanceSystem : MonoBehaviour
 
     public void SubscribeEvents(TimeSystem timeSystem, EmployeeSystem employeeSystem)
     {
-        timeSystem.endWork += OnDayEnded;
+        timeSystem.EndWork += OnDayEnded;
         this.employeeSystem = employeeSystem;
     }
 

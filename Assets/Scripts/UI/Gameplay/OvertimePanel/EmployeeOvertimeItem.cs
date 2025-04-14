@@ -17,11 +17,11 @@ public class EmployeeOvertimeItem : MonoBehaviour
     {
         emp = employee;
         UpdateInfo();
-        emp.employeeChanged += UpdateInfo;
+        emp.EmployeeInfoChanged += UpdateInfo;
     }
     public void OnDestroy()
     {
-        emp.employeeChanged -= UpdateInfo;
+        emp.EmployeeInfoChanged -= UpdateInfo;
     }
 
     public void OnClick()
