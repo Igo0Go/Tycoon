@@ -194,13 +194,14 @@ public class EmployeeSystem : MonoBehaviour
     }
     private void OnEmployeeMaxStress(Employee e)
     {
-        GameUICenter.messageQueue.PrepareMessage(e.Name + " уволняется", 
-            e.EmployeeSpeachPack.employeeMaxStressMessege);
+        GameUICenter.messageQueue.PrepareMessage(e.EmployeeSpeachPack.employeeMaxStressMessege.Header,
+            e.EmployeeSpeachPack.employeeMaxStressMessege.Message);
     }
     private void OnEmployeeMaxFatigue(Employee e)
     {
-        GameUICenter.messageQueue.PrepareMessage(e.Name + " не вышел на работу", 
-            e.EmployeeSpeachPack.GetRandomMaxFatigueSpeach());
+        MessagePanelPack pack = e.EmployeeSpeachPack.GetRandomMaxFatigueSpeach();
+
+        GameUICenter.messageQueue.PrepareMessage(pack.Header, pack.Message);
     }
     #endregion
 
