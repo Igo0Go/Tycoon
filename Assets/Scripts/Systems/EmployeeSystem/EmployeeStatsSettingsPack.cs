@@ -3,6 +3,11 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "IgoGo/EmployeeStatsSettings")]
 public class EmployeeStatsSettingsPack : ScriptableObject
 {
+    [Tooltip("—тандартна€ скорость выполнени€ задач")]
+    public int baseTaskWorkSpeed = 1;
+    [Tooltip("—тандартна€ скорость тестировани€ задач")]
+    public int baseTaskTestSpeed = 1;
+
     [Tooltip("Ѕазовый уровень квалификации сотрудников при выполнении задач. ќт этого зависит, как часто они будут ошибатьс€")]
     public int baseEmployeeTaskLevel = 100;
     [Tooltip("ћножитель вли€ни€ усталости на сложность выполнени€ задач")]
@@ -39,6 +44,9 @@ public class EmployeeStatsSettingsPack : ScriptableObject
 
     public void AcceptThisSettings()
     {
+        EmployeeStatsSettings.baseTaskWorkSpeed = baseTaskWorkSpeed;
+        EmployeeStatsSettings.baseTaskTestSpeed = baseTaskTestSpeed;
+
         EmployeeStatsSettings.baseEmployeeTaskLevel = baseEmployeeTaskLevel;
         EmployeeStatsSettings.fatigueTaskDificultyMultiplier = fatigueTaskDificultyMultiplier;
         EmployeeStatsSettings.stressTaskDificultyMultiplier = stressTaskDificultyMultiplier;
@@ -64,6 +72,15 @@ public class EmployeeStatsSettingsPack : ScriptableObject
 /// </summary>
 public static class EmployeeStatsSettings
 {
+    /// <summary>
+    /// —тандартна€ скорость выполнени€ задач
+    /// </summary>
+    public static int baseTaskWorkSpeed = 1;
+    /// <summary>
+    /// —тандартна€ скорость тестировани€ задач
+    /// </summary>
+    public static int baseTaskTestSpeed = 1;
+
     /// <summary>
     /// Ѕазовый уровень квалификации сотрудников при выполнении задач. ќт этого зависит, как часто они будут ошибатьс€
     /// </summary>

@@ -1,12 +1,36 @@
 using UnityEngine;
 
+/// <summary>
+/// Класс задачи сотрудника
+/// </summary>
 public class EmployeeTask
 {
+    #region Свойства
+
+    /// <summary>
+    /// Название задачи
+    /// </summary>
     public string Name { get; private set; }
+
+    /// <summary>
+    /// Описание задачи
+    /// </summary>
     public string Description { get; private set; }
 
+    /// <summary>
+    /// Всё время на выполнение задачи
+    /// </summary>
     public int AllTaskTime { get; private set; }
+
+    /// <summary>
+    /// Время, которое над задачей уже отработали
+    /// </summary>
     public int CompleteTaskTime { get; set; }
+
+    /// <summary>
+    /// Расчитываемое время на тестирование задачи. Обычно - десятая часть от времени работы над задачей, 
+    /// но не меньше 15 минут
+    /// </summary>
     public int TestingTime
     {
         get
@@ -19,30 +43,47 @@ public class EmployeeTask
             return result;
         }
     }
+
+    /// <summary>
+    /// Рассчитываемый процент выполнения задачи
+    /// </summary>
     public int Progress => CalculateProgressPercent();
 
+    /// <summary>
+    /// Тип задачи
+    /// </summary>
     public EmployeeTaskType Type { get; private set; }
+
+    /// <summary>
+    /// Это задача сейчас на тестировании
+    /// </summary>
     public bool Testing { get; set; } = false;
 
+    /// <summary>
+    /// Эта задача выполнена без ошибок
+    /// </summary>
     public bool IsCorrectTask { get; private set; }
 
+    /// <summary>
+    /// Сложность задачи. Влияет на накопление усталости и вероятность ошибки
+    /// </summary>
     public int Complexity { get; private set; }
 
-    private Employee worker;
-    private Employee tester;
+    /// <summary>
+    /// Сотрудник, назначенный на выполнение задачи
+    /// </summary>
+    public Employee Worker { get; private set; }
 
-    public const int defaultTaskWorkSpeedPerMinute = 1;
-    public const int defaultTaskTestSpeedPerMinute = 2;
+    /// <summary>
+    /// Сотрудник, назначенный на тестирование задачи
+    /// </summary>
+    public Employee Tester { get; private set; }
 
-    public string GenerateErrorMessage()
-    {
-        return "Тестировщик " + tester.Name + " сообщает, что задача " + Name + " выполнена с ошибкой. Эта задача раньше была" +
-            " отдана работнику " + worker.Name;
-    }
+    #endregion
 
     public EmployeeTask(EmployeeTaskInfo info)
     {
-        Name = info.taskName; 
+        Name = info.taskName;
         Description = info.taskDescription;
         AllTaskTime = info.workTimeHours * 60 + info.workTimeMinutes;
         Type = info.taskType;
@@ -52,30 +93,62 @@ public class EmployeeTask
         IsCorrectTask = true;
     }
 
-    public void StartThisTask(Employee worker)
+    #region Методы
+
+    #region Пока не используется
+
+    public string GenerateErrorMessage()
     {
-        this.worker = worker;
+        return "Тестировщик " + Tester.Name + " сообщает, что задача " + Name + " выполнена с ошибкой. Эта задача раньше была" +
+            " отдана работнику " + Worker.Name;
     }
-    public void EndWorkForThisTask(Employee employee)
+
+    #endregion
+
+    /// <summary>
+    /// Назначить сотрудника на эту задачу
+    /// </summary>
+    /// <param name="worker">Сотрудник</param>
+    public void SetWorkerToThisTask(Employee worker)
+    {
+        Worker = worker;
+    }
+    /// <summary>
+    /// Работник работник завершает работу с этой задачей
+    /// </summary>
+    public void FinalWorkForThisTask()
     {
         ResetProgress();
 
+        //вычисляем сложность задачи
         int difficultLevel = Random.Range(1, 10) * Complexity;
-        int employeeLevel = (EmployeeStatsSettings.baseEmployeeTaskLevel + employee.ExperienceHours) - 
-            (employee.Fatigue *  + employee.Stress);
 
-        IsCorrectTask =  employeeLevel > difficultLevel;
+        //вычисляем способность сотрудника
+        int employeeLevel = EmployeeStatsSettings.baseEmployeeTaskLevel + Worker.ExperienceHours -
+            (Worker.Fatigue * EmployeeStatsSettings.fatigueTaskDificultyMultiplier +
+            Worker.Stress * EmployeeStatsSettings.stressTaskDificultyMultiplier);
+
+        IsCorrectTask = employeeLevel > difficultLevel;
         Testing = true;
-        employee.FatigueLevelUP(Complexity);
+        Worker.FatigueLevelUP(Complexity);
     }
-    public void StartTestingThisTask(Employee tester)
+
+    /// <summary>
+    /// Назначить тестировщика на эту задачу
+    /// </summary>
+    /// <param name="tester">Сотрудник - тестировщик</param>
+    public void SetTesterToThisTask(Employee tester)
     {
-        this.tester = tester;
+        Tester = tester;
     }
-    public bool EndTestingThisTask(Employee tester)
+    /// <summary>
+    /// Выбранный сотрудник завершает тестирование этой 
+    /// </summary>
+    /// <returns>Закончена ли эта задача без ошибок</returns>
+    public bool FinalTestingThisTask()
     {
         Testing = false;
-        tester.FatigueLevelUP(Complexity/2);
+        Tester.FatigueLevelUP(Complexity / 2);
         if (!IsCorrectTask)
         {
             ResetProgress();
@@ -83,11 +156,19 @@ public class EmployeeTask
 
         return IsCorrectTask;
     }
+
+    /// <summary>
+    /// Сбросить прогресс по этой задаче
+    /// </summary>
     public void ResetProgress()
     {
         CompleteTaskTime = 0;
     }
 
+    /// <summary>
+    /// Задача закончена
+    /// </summary>
+    /// <returns>Завершённое время задачи покрывает всё время задачи</returns>
     public bool IsReady()
     {
         if (Testing)
@@ -100,9 +181,10 @@ public class EmployeeTask
         }
     }
 
+
     private int CalculateProgressPercent()
     {
-        if(Testing)
+        if (Testing)
         {
             return (int)Mathf.Clamp(Mathf.Round(CompleteTaskTime / TestingTime * 100), 0, 100);
         }
@@ -111,4 +193,6 @@ public class EmployeeTask
             return (int)Mathf.Clamp(Mathf.Round(CompleteTaskTime / AllTaskTime * 100), 0, 100);
         }
     }
+
+    #endregion
 }

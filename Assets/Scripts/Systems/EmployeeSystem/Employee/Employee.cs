@@ -375,11 +375,11 @@ public class Employee
             int workSpeed;
             if (CurrentTask.Type == EmployeeTaskType.Testing)
             {
-                workSpeed = EmployeeTask.defaultTaskTestSpeedPerMinute + EmployeeStatsPack.GetTaskSpeed(EmployeeTaskType.Testing);
+                workSpeed = EmployeeStatsSettings.baseTaskWorkSpeed + EmployeeStatsPack.GetTaskSpeed(EmployeeTaskType.Testing);
             }
             else
             {
-                workSpeed = EmployeeTask.defaultTaskWorkSpeedPerMinute + EmployeeStatsPack.GetTaskSpeed(CurrentTask.Type);
+                workSpeed = EmployeeStatsSettings.baseTaskTestSpeed + EmployeeStatsPack.GetTaskSpeed(CurrentTask.Type);
             }
             workMinutes++;
             CurrentTask.CompleteTaskTime += workSpeed;
