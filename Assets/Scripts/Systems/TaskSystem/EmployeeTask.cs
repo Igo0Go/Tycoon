@@ -61,7 +61,8 @@ public class EmployeeTask
         ResetProgress();
 
         int difficultLevel = Random.Range(1, 10) * Complexity;
-        int employeeLevel = 100 - employee.Fatigue - employee.Stress / 2;
+        int employeeLevel = (EmployeeStatsSettings.baseEmployeeTaskLevel + employee.ExperienceHours) - 
+            (employee.Fatigue *  + employee.Stress);
 
         IsCorrectTask =  employeeLevel > difficultLevel;
         Testing = true;

@@ -45,6 +45,10 @@ public class EmployeeStatsPack : ICloneable
         new EmployeeTaskSpeedItem() { taskType = EmployeeTaskType.Testing, taskSpeed = 0}
     };
 
+    /// <summary>
+    /// Получить полную копию пакета
+    /// </summary>
+    /// <returns>Новый экземпляр пакета статистик с теми же значениями</returns>
     public object Clone()
     {
         EmployeeStatsPack pack = new EmployeeStatsPack();
@@ -61,6 +65,11 @@ public class EmployeeStatsPack : ICloneable
         return pack;
     }
 
+    /// <summary>
+    /// Получить скорость работы над задачей определённого типа
+    /// </summary>
+    /// <param name="taskType">Тип здачи</param>
+    /// <returns>Скорость работы над задачей (единиц за тик)</returns>
     public int GetTaskSpeed(EmployeeTaskType taskType)
     {
         foreach (var item in taskSpeedItems)
@@ -73,6 +82,10 @@ public class EmployeeStatsPack : ICloneable
         return 1;
     }
 
+    /// <summary>
+    /// Рассчитать пороговое значение для усталости
+    /// </summary>
+    /// <returns>Пороговое значение для усталости с учётом рассеяния</returns>
     public int GetThresholdFatigue()
     {
         int result = fatigueThresholdValue;
@@ -81,6 +94,10 @@ public class EmployeeStatsPack : ICloneable
         return result + range;
     }
 
+    /// <summary>
+    /// Рассчитать пороговое значение для стресса
+    /// </summary>
+    /// <returns>Пороговое значение для стресса с учётом рассеяния</returns>
     public int GetThresholdStress()
     {
         int result = stressThresholdValue;

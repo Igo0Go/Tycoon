@@ -5,10 +5,29 @@ public class Employee
 {
     #region Базовые характеристики
 
+    /// <summary>
+    /// Имя сотрудника
+    /// </summary>
     public string Name { get; private set; }
+
+    /// <summary>
+    /// Базовый оклад сотруднрика. Сумма будет вычитаться из бюджета каждый день
+    /// </summary>
     public float BaseSalary { get; private set; }
+
+    /// <summary>
+    /// Разовая стоимость рекрутирования сотрудника
+    /// </summary>
     public float CostOfAttracting { get; private set; }
+
+    /// <summary>
+    /// Пакет статистик сотрудника. Информация о скоростях роста и падения усталости и стресса
+    /// </summary>
     public EmployeeStatsPack EmployeeStatsPack { get; private set; }
+
+    /// <summary>
+    /// Набор фраз сотрудника на разные ситуации
+    /// </summary>
     public EmployeeSpeachPack EmployeeSpeachPack { get; private set; }
 
     #endregion
@@ -49,12 +68,21 @@ public class Employee
     }
     private int _fatigue;
 
-    public string SalaryStrategyName => salaryStrategy.StateName;
+    /// <summary>
+    /// Название текущей схемы оплаты
+    /// </summary>
+    public string SalaryStrategyName => salaryStrategy.StrategyName;
     private ISalaryStrategy salaryStrategy = SalaryStrategySingleton.BaseSalaryStatus;
 
+    /// <summary>
+    /// Опыт сотрудника в часах. Позволяет успешно выполнять задачи даже в состоянии усталости и стресса
+    /// </summary>
     public int ExperienceHours => workMinutes / 60;
     private int workMinutes = 0;
 
+    /// <summary>
+    /// Текущая задача сотрудника
+    /// </summary>
     public EmployeeTask CurrentTask
     {
         get => _currentTask;
@@ -70,7 +98,9 @@ public class Employee
 
     #region Статусы
 
-
+    /// <summary>
+    /// Строковое обозначения текущего состояния сотрудника
+    /// </summary>
     public string DayState
     {
         get
@@ -86,9 +116,19 @@ public class Employee
     }
     private EmployeeDayState _dayState;
 
+    /// <summary>
+    /// Назначен ли сотрудник на сверхурочную работу
+    /// </summary>
     public bool OverTime { get; private set; }
 
+    /// <summary>
+    /// Активен ли сотрудник. Готов ли он работать в данный момент
+    /// </summary>
     public bool IsActive => _dayState == EmployeeDayState.work;
+
+    /// <summary>
+    /// Выполняет ли сотрудник в данный момент какую-то задачу
+    /// </summary>
     public bool IsDoTask => IsActive && CurrentTask != null;
 
 

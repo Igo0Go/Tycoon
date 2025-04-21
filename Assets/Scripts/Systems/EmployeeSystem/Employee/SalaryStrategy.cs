@@ -1,7 +1,20 @@
 public interface ISalaryStrategy
 {
-    string StateName { get; }
+    /// <summary>
+    /// Название стратегии расчёта заработной платы
+    /// </summary>
+    string StrategyName { get; }
+    /// <summary>
+    /// Получить строковую информацию о расчёте заработной платы
+    /// </summary>
+    /// <param name="employee">Для какого сотрудника</param>
+    /// <returns>Строка с информацией о расчёте заработной платы</returns>
     string GetSalaryInfo(Employee employee);
+    /// <summary>
+    /// Рассчитать заработную плату
+    /// </summary>
+    /// <param name="employee">Для сотрудника</param>
+    /// <returns>Размер заработной платы</returns>
     float CalculateSalary(Employee employee);
 }
 
@@ -17,7 +30,7 @@ public static class SalaryStrategySingleton
 /// </summary>
 public class BaseSalaryStrategy : ISalaryStrategy
 {
-    public string StateName => "Базовый оклад";
+    public string StrategyName => "Базовый оклад";
     public float CalculateSalary(Employee employee)
     {
         return employee.BaseSalary;
@@ -32,7 +45,7 @@ public class HospitalSalaryStrategy : ISalaryStrategy
     public const float hospitalSalaryMultiplier = 0.5f;
 
 
-    public string StateName => "На больничном";
+    public string StrategyName => "На больничном";
     public float CalculateSalary(Employee employee)
     {
         return employee.BaseSalary * hospitalSalaryMultiplier;
@@ -47,7 +60,7 @@ public class OvertimeSalaryStrategy : ISalaryStrategy
 {
     public const float overtimeSalaryMultiplier = 2;
 
-    public string StateName => "Базовый оклад + Сверхурочные";
+    public string StrategyName => "Базовый оклад + Сверхурочные";
     public float CalculateSalary(Employee employee)
     {
         return employee.BaseSalary * overtimeSalaryMultiplier;
