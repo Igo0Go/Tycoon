@@ -151,6 +151,7 @@ public class Employee
             SetBaseSalaryStatus();
             OverTime = false;
         }
+        EmployeeInfoChanged?.Invoke();
     }
 
     /// <summary>
@@ -159,7 +160,6 @@ public class Employee
     public void SetBaseSalaryStatus()
     {
         salaryStrategy = SalaryStrategySingleton.BaseSalaryStatus;
-        EmployeeInfoChanged?.Invoke();
     }
     /// <summary>
     /// Установить стратегию выплаты больничных
@@ -167,7 +167,6 @@ public class Employee
     public void SetHospitalSalaryStatus()
     {
         salaryStrategy = SalaryStrategySingleton.HospitalSalaryStatus;
-        EmployeeInfoChanged?.Invoke();
     }
     /// <summary>
     /// Установить стратегию выплаты по правилам сверхурочных
@@ -175,7 +174,6 @@ public class Employee
     public void SetOvertimeSalaryStatus()
     {
         salaryStrategy = SalaryStrategySingleton.OvertimeSalaryStatus;
-        EmployeeInfoChanged?.Invoke();
     }
 
     /// <summary>
