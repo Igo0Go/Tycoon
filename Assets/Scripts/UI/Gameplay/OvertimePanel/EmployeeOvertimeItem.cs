@@ -26,14 +26,7 @@ public class EmployeeOvertimeItem : MonoBehaviour
 
     public void OnClick()
     {
-        if(emp.OverTime)
-        {
-            emp.SetBaseSalaryStatus();
-        }
-        else
-        {
-            emp.SetOvertimeSalaryStatus();
-        }
+        emp.SetOvertimeState(!emp.OverTime);
         UpdateInfo();
     }
 

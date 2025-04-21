@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
-public class EmployeeStatsPack
+public class EmployeeStatsPack : ICloneable
 {
     [Min(1)]
     [Tooltip("ѕороговый уровень усталости. «начение усталости, после которого сотрудник не выйдет на работу")]
@@ -45,6 +45,22 @@ public class EmployeeStatsPack
         new EmployeeTaskSpeedItem() { taskType = EmployeeTaskType.Testing, taskSpeed = 0}
     };
 
+    public object Clone()
+    {
+        EmployeeStatsPack pack = new EmployeeStatsPack();
+        pack.fatigueThresholdValue = fatigueThresholdValue;
+        pack.fatigueThresholdRange = fatigueThresholdRange;
+        pack.addingFatigueGrowthPoints = addingFatigueGrowthPoints;
+        pack.addingFatigueLoweringPoints = addingFatigueLoweringPoints;
+
+        pack.stressThresholdValue = stressThresholdValue;
+        pack.stressThresholdRange = stressThresholdRange;
+        pack.addingStressGrowthPoints = addingStressGrowthPoints;
+        pack.addingStressLoweringPoints = addingStressLoweringPoints;
+
+        return pack;
+    }
+
     public int GetTaskSpeed(EmployeeTaskType taskType)
     {
         foreach (var item in taskSpeedItems)
@@ -59,7 +75,7 @@ public class EmployeeStatsPack
 
     public int GetThresholdFatigue()
     {
-        int result = fatigueThresholdRange;
+        int result = fatigueThresholdValue;
         int range = UnityEngine.Random.Range(-fatigueThresholdRange, fatigueThresholdRange);
 
         return result + range;
@@ -67,7 +83,7 @@ public class EmployeeStatsPack
 
     public int GetThresholdStress()
     {
-        int result = fatigueThresholdRange;
+        int result = stressThresholdValue;
         int range = UnityEngine.Random.Range(-fatigueThresholdRange, fatigueThresholdRange);
 
         return result + range;

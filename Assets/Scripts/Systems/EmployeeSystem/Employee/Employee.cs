@@ -5,18 +5,15 @@ public class Employee
 {
     #region Базовые характеристики
 
-
     public string Name { get; private set; }
     public float BaseSalary { get; private set; }
     public float CostOfAttracting { get; private set; }
     public EmployeeStatsPack EmployeeStatsPack { get; private set; }
     public EmployeeSpeachPack EmployeeSpeachPack { get; private set; }
 
-
     #endregion
 
     #region Изменяемые характеристики
-
 
     /// <summary>
     /// Нервозность сотрудника
@@ -29,7 +26,7 @@ public class Employee
         }
         private set
         {
-            _stress = Math.Clamp(value, 0, 100);
+            _stress = Math.Clamp(value, 0, EmployeeStatsPack.stressThresholdValue);
             EmployeeInfoChanged?.Invoke();
         }
     }
@@ -46,7 +43,7 @@ public class Employee
         }
         private set
         {
-            _fatigue = Math.Clamp(value, 0, 200);
+            _fatigue = Math.Clamp(value, 0, EmployeeStatsPack.fatigueThresholdValue);
             EmployeeInfoChanged?.Invoke();
         }
     }
@@ -68,7 +65,6 @@ public class Employee
         }
     }
     private EmployeeTask _currentTask;
-
 
     #endregion
 
@@ -115,7 +111,7 @@ public class Employee
         CostOfAttracting = costOfAttractiong;
         workMinutes = experienceInHour * 60;
 
-        EmployeeStatsPack = statsPack;
+        EmployeeStatsPack = (EmployeeStatsPack)statsPack.Clone();
         EmployeeSpeachPack = speachPack;
     }
 
@@ -137,6 +133,24 @@ public class Employee
     public string GetSalaryInfo()
     {
         return salaryStrategy.GetSalaryInfo(this);
+    }
+
+    /// <summary>
+    /// Назначить сотруднику состояние сверхурочной работы или вывести из него, также изменяя стратегию оплаты
+    /// </summary>
+    /// <param name="value">значение - должен ли сотрудник работать сверхурочно</param>
+    public void SetOvertimeState(bool value)
+    {
+        if (value)
+        {
+            SetOvertimeSalaryStatus();
+            OverTime = true;
+        }
+        else
+        {
+            SetBaseSalaryStatus();
+            OverTime = false;
+        }
     }
 
     /// <summary>
@@ -237,12 +251,12 @@ public class Employee
 
         if (OverTime)
         {
-            FatigueLevelLower(EmployeeStatsSettings.dailyFatigueOvertimeLowering);
+            FatigueLevelLower(EmployeeStatsPack.fatigueThresholdValue / EmployeeStatsSettings.dailyFatigueOvertimeLowering);
             StressLevelUP(EmployeeStatsSettings.dailyStreesOvertimeGrowth);
         }
         else
         {
-            FatigueLevelLower(EmployeeStatsSettings.dailyFatigueLowering);
+            FatigueLevelLower(EmployeeStatsPack.fatigueThresholdValue / EmployeeStatsSettings.dailyFatigueLowering);
             StressLevelLower(EmployeeStatsSettings.dailyStreesLowering);
         }
     }
@@ -265,12 +279,9 @@ public class Employee
         }
         return true;
     }
-
-
     #endregion
 
     #region Действия сотрудника
-
 
     /// <summary>
     /// Нанять сотрудника. Он скажет приветственную фразу
@@ -334,11 +345,14 @@ public class Employee
             }
             workMinutes++;
             CurrentTask.CompleteTaskTime += workSpeed;
-            FatigueLevelUP(CurrentTask.Complexity);
+
+            if(CurrentTask.CompleteTaskTime % 60 == 0)
+            {
+                FatigueLevelUP(CurrentTask.Complexity);
+            }
             DoTask?.Invoke();
         }
     }
-
 
     #endregion
 }

@@ -109,7 +109,6 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
     }
     public void SetUp()
     {
-        stressSlider.maxValue = fatigueSlider.maxValue = 100;
         HidePanel();
     }
 
@@ -137,7 +136,6 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
         ClearEmployeeList();
         resurcePanel.SetActive(false);
     }
-
 
     public void OnCurrentSumChanged(float newSum)
     {
@@ -284,6 +282,8 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
     {
         if(CurrentEmployee != null)
         {
+            fatigueSlider.maxValue = CurrentEmployee.EmployeeStatsPack.fatigueThresholdValue;
+            stressSlider.maxValue = CurrentEmployee.EmployeeStatsPack.stressThresholdValue;
             stressSlider.value = CurrentEmployee.Stress;
             fatigueSlider.value = CurrentEmployee.Fatigue;
             nameText.text = CurrentEmployee.Name;

@@ -14526,6 +14526,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   team: {fileID: 11400000, guid: 88be57f4a0dabbd42aaabfcb567e1adb, type: 2}
+  statsSettingsPack: {fileID: 11400000, guid: deb39f69756d94c4881280c081bb4c30, type: 2}
   employeeMaxStressMessege: "\u042F \u0431\u043E\u043B\u044C\u0448\u0435 \u0442\u0430\u043A
     \u043D\u0435 \u043C\u043E\u0433\u0443. \u0420\u0430\u0431\u043E\u0442\u044B \u043C\u043E\u0440\u0435,
     \u0437\u0430\u0440\u043F\u043B\u0430\u0442\u0430 \u043C\u0430\u043B\u0435\u043D\u044C\u043A\u0430\u044F.

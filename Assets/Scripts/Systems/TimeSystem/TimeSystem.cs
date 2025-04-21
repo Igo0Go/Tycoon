@@ -228,6 +228,7 @@ public class TimeSystem : MonoBehaviour
         {
             _currentMinute = 0;
             CurrentHour = endLunchHour;
+            StartWork?.Invoke();
         }
     }
 
@@ -325,9 +326,8 @@ public class TimeSystem : MonoBehaviour
         else if (CurrentHour >= endDayHour && CurrentHour < startDayHour)
         {
             currentDayPart = DayPart.HomeTime;
-            EndOfDay?.Invoke();
             GameUICenter.messageQueue.PrepareMessage(dayPartMessagePack.endDayMessage.Header,
-                dayPartMessagePack.endDayMessage.Header, EndDay);
+                dayPartMessagePack.endDayMessage.Message, EndDay);
         }
     }
 

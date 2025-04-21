@@ -6,6 +6,8 @@ public class EmployeeSystem : MonoBehaviour
 {
     [SerializeField]
     private EmployeeTeam team;
+    [SerializeField]
+    private EmployeeStatsSettingsPack statsSettingsPack;
 
     [SerializeField, TextArea(5, 10)]
     private string employeeMaxStressMessege;
@@ -61,6 +63,7 @@ public class EmployeeSystem : MonoBehaviour
     }
     public void SetUp()
     {
+        statsSettingsPack.AcceptThisSettings();
         TeamChanged?.Invoke(Employees);
     }
 

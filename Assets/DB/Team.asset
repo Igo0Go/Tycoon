@@ -18,7 +18,7 @@ MonoBehaviour:
     costOfAttracting: 80
     experienceInHour: 500
     statsPack:
-      fatigueThresholdValue: 90
+      fatigueThresholdValue: 100
       fatigueThresholdRange: 1
       addingFatigueGrowthPoints: 0
       addingFatigueLoweringPoints: 0
@@ -196,7 +196,7 @@ MonoBehaviour:
     costOfAttracting: 100
     experienceInHour: 80
     statsPack:
-      fatigueThresholdValue: 90
+      fatigueThresholdValue: 95
       fatigueThresholdRange: 5
       addingFatigueGrowthPoints: 0
       addingFatigueLoweringPoints: 0
@@ -258,7 +258,7 @@ MonoBehaviour:
     costOfAttracting: 100
     experienceInHour: 70
     statsPack:
-      fatigueThresholdValue: 90
+      fatigueThresholdValue: 75
       fatigueThresholdRange: 5
       addingFatigueGrowthPoints: 0
       addingFatigueLoweringPoints: 0
@@ -290,7 +290,7 @@ MonoBehaviour:
     costOfAttracting: 45
     experienceInHour: 0
     statsPack:
-      fatigueThresholdValue: 90
+      fatigueThresholdValue: 19440000
       fatigueThresholdRange: 5
       addingFatigueGrowthPoints: 0
       addingFatigueLoweringPoints: 0
@@ -316,7 +316,7 @@ MonoBehaviour:
     costOfAttracting: 80
     experienceInHour: 0
     statsPack:
-      fatigueThresholdValue: 90
+      fatigueThresholdValue: 19440000
       fatigueThresholdRange: 5
       addingFatigueGrowthPoints: 0
       addingFatigueLoweringPoints: 0
@@ -342,7 +342,7 @@ MonoBehaviour:
     costOfAttracting: 45
     experienceInHour: 0
     statsPack:
-      fatigueThresholdValue: 90
+      fatigueThresholdValue: 19440000
       fatigueThresholdRange: 5
       addingFatigueGrowthPoints: 0
       addingFatigueLoweringPoints: 0
@@ -368,7 +368,7 @@ MonoBehaviour:
     costOfAttracting: 70
     experienceInHour: 0
     statsPack:
-      fatigueThresholdValue: 90
+      fatigueThresholdValue: 19440000
       fatigueThresholdRange: 5
       addingFatigueGrowthPoints: 0
       addingFatigueLoweringPoints: 0
@@ -394,7 +394,7 @@ MonoBehaviour:
     costOfAttracting: 100
     experienceInHour: 0
     statsPack:
-      fatigueThresholdValue: 90
+      fatigueThresholdValue: 19440000
       fatigueThresholdRange: 5
       addingFatigueGrowthPoints: 0
       addingFatigueLoweringPoints: 0
