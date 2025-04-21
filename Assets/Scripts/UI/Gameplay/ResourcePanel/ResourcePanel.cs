@@ -98,8 +98,8 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
         showRecrutsButton.onClick.AddListener(() => SetDrawMode(EmployeeListDrawMode.recruts));
 
         this.financeSystem = financeSystem;
-        financeSystem.currentSummChanged += OnCurrentSumChanged;
-        financeSystem.currentRentCostChanged += RedrawFinanceInfo;
+        financeSystem.CurrentSummChanged += OnCurrentSumChanged;
+        financeSystem.CurrentRentCostChanged += RedrawFinanceInfo;
         this.employeeSystem = employeeSystem;
         employeeSystem.TeamChanged += RedrawEmployeesStatsPanel;
         employeeSystem.TeamChanged += (e)=> RedrawFinanceInfo();

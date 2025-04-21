@@ -85,10 +85,6 @@ public class TimeSystem : MonoBehaviour
     [SerializeField]
     private DayPartMessagePack dayPartMessagePack;
 
-    /// <summary>
-    /// Набор с информацией о проекте. Сообщания по дням, лимит дней и т.д.
-    /// </summary>
-    [SerializeField]
     private EmployeeProjectData projectData;
 
 
@@ -132,11 +128,12 @@ public class TimeSystem : MonoBehaviour
     public void SubscribeEvents(EmployeeTaskSystem taskSystem, FinanceSystem financeSystem)
     {
         taskSystem.ProjectComplete += () => useTime = false;
-        financeSystem.financeLost += (value) => financeLost = value;
+        financeSystem.FinanceLost += (value) => financeLost = value;
     }
 
-    public void SetUp()
+    public void SetUp(EmployeeProjectData employeeProjectData)
     {
+        projectData = employeeProjectData;
         CurrentDate = DateTime.Now;
         TimeSettings.TimeSpeed = timeSpeed;
         CurrentHour = 9;

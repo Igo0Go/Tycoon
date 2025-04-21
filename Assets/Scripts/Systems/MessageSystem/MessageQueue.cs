@@ -118,4 +118,18 @@ public class MessagePanelPack
     /// </summary>
     [TextArea(5, 10)]
     public string Message;
+
+    /// <summary>
+    /// Получить новый экземпляр сообщения для информации об оплате за день.
+    /// </summary>
+    /// <param name="sum">Сумма чека</param>
+    /// <returns>Пакет с сообщением о чеке</returns>
+    public static MessagePanelPack GetCheckMessagePack(float sum)
+    {
+        return new MessagePanelPack()
+        {
+            Header = "Ваш чек",
+            Message = "За аренду помещения и сопутствующие услуги требуется заплатить " + sum + "."
+        };
+    }
 }
