@@ -317,6 +317,35 @@ public class Employee
         }
         return true;
     }
+
+    /// <summary>
+    /// ѕолучить пакет с сообщением о максимальном стрессе
+    /// </summary>
+    /// <returns>ѕакет с сообщением</returns>
+    public MessagePanelPack GetMaxStressPack()
+    {
+        MessagePanelPack pack = new()
+        {
+            Header = Name + " увольн€етс€",
+            Message = EmployeeSpeachPack.employeeMaxStressMessege
+        };
+        return pack;
+    }
+
+    /// <summary>
+    /// ѕолучить пакет с сообщением о максимальной усталости
+    /// </summary>
+    /// <returns>ѕакет с сообщением</returns>
+    public MessagePanelPack GetMaxFatiguePack()
+    {
+        MessagePanelPack pack = new()
+        {
+            Header = Name + " не приходит на работу",
+            Message = EmployeeSpeachPack.GetRandomMaxFatigueSpeach()
+        };
+        return pack;
+    }
+
     #endregion
 
     #region ƒействи€ сотрудника

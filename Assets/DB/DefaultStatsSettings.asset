@@ -12,6 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ea9c0795aadfae40a0d1d3856ab8e05, type: 3}
   m_Name: DefaultStatsSettings
   m_EditorClassIdentifier: 
+  baseTaskWorkSpeed: 1
+  baseTaskTestSpeed: 1
+  baseEmployeeTaskLevel: 50
+  fatigueTaskDificultyMultiplier: 1
+  stressTaskDificultyMultiplier: 1
   baseStreesGrowthSpeed: 1
   baseStreesLoweringSpeed: 1
   dailyStreesGrowth: 1

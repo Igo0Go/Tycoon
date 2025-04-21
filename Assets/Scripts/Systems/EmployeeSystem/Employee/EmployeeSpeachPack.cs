@@ -21,11 +21,15 @@ public class EmployeeSpeachPack
 
     [Tooltip("Список фраз для ситуации максимального понижения заработной платы")]
     [SerializeField]
-    private List<MessagePanelPack> employeeMaxFatigueMesseges;
-
+    [TextArea(5, 10)]
+    private List<string> employeeMaxFatigueMesseges = new List<string>()
+    {
+        "Простите, я не смогу сегодня выйти на работу. Очень плохо себя чувствую."
+    };
 
     [Tooltip("Фраза при максимальном стрессе")]
-    public MessagePanelPack employeeMaxStressMessege;
+    [TextArea(5, 10)]
+    public string employeeMaxStressMessege = "Я так больше не могу. Я ухожу";
 
     /// <summary>
     /// Проверить, есть ли ещё у сотрудника фразы перед увольнением. Если их нет, сотрудник уйдёт, ничего не сказав.
@@ -67,7 +71,7 @@ public class EmployeeSpeachPack
     /// Получить случайную фразу при максимальной усталости. Каждый раз сотрудник будет оправыдываться случайной фразой
     /// </summary>
     /// <returns>Пакет с фарзой</returns>
-    public MessagePanelPack GetRandomMaxFatigueSpeach()
+    public string GetRandomMaxFatigueSpeach()
     {
         return employeeMaxFatigueMesseges[UnityEngine.Random.Range(0, employeeMaxFatigueMesseges.Count)];
     }
