@@ -16,8 +16,8 @@ public class OvertimeSelectorPanel : MonoBehaviour
     public void SubscribeEvents(EmployeeSystem employeeSystem, TimeSystem timeSystem)
     {
         this.employeeSystem = employeeSystem;
-        employeeSystem.teamChanged += RebuildEmployeesList;
-        timeSystem.overtimeAccepted += ShowPanel;
+        employeeSystem.TeamChanged += RebuildEmployeesList;
+        timeSystem.OvertimeAccepted += ShowPanel;
     }
     public void SetUp()
     {

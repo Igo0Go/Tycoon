@@ -17,23 +17,16 @@ public class EmployeeOvertimeItem : MonoBehaviour
     {
         emp = employee;
         UpdateInfo();
-        emp.employeeChanged += UpdateInfo;
+        emp.EmployeeInfoChanged += UpdateInfo;
     }
     public void OnDestroy()
     {
-        emp.employeeChanged -= UpdateInfo;
+        emp.EmployeeInfoChanged -= UpdateInfo;
     }
 
     public void OnClick()
     {
-        if(emp.OverTime)
-        {
-            emp.SetBaseSalaryStatus();
-        }
-        else
-        {
-            emp.SetOvertimeSalaryStatus();
-        }
+        emp.SetOvertimeState(!emp.OverTime);
         UpdateInfo();
     }
 

@@ -98,18 +98,17 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
         showRecrutsButton.onClick.AddListener(() => SetDrawMode(EmployeeListDrawMode.recruts));
 
         this.financeSystem = financeSystem;
-        financeSystem.currentSummChanged += OnCurrentSumChanged;
-        financeSystem.currentRentCostChanged += RedrawFinanceInfo;
+        financeSystem.CurrentSummChanged += OnCurrentSumChanged;
+        financeSystem.CurrentRentCostChanged += RedrawFinanceInfo;
         this.employeeSystem = employeeSystem;
-        employeeSystem.teamChanged += RedrawEmployeesStatsPanel;
-        employeeSystem.teamChanged += (e)=> RedrawFinanceInfo();
+        employeeSystem.TeamChanged += RedrawEmployeesStatsPanel;
+        employeeSystem.TeamChanged += (e)=> RedrawFinanceInfo();
 
-        employeeSystem.teamChanged += ShowEmployees;
-        employeeSystem.recrutsChanged += ShowRecruts;
+        employeeSystem.TeamChanged += ShowEmployees;
+        employeeSystem.RecrutsChanged += ShowRecruts;
     }
     public void SetUp()
     {
-        stressSlider.maxValue = fatigueSlider.maxValue = 100;
         HidePanel();
     }
 
@@ -138,7 +137,6 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
         resurcePanel.SetActive(false);
     }
 
-
     public void OnCurrentSumChanged(float newSum)
     {
         currentSumText.text = newSum.ToString();
@@ -163,8 +161,15 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
 
     public void OnDissmissCurrentEmployeeClick()
     {
-        GameUICenter.messageQueue.PrepareMessage("Неприятный разговор", CurrentEmployee.DissmissSpeach,
-            DissmissCurrentEmployee, () => { });
+        if(CurrentEmployee.EmployeeSpeachPack.TryGetDissmissSpeach(out MessagePanelPack pack))
+        {
+            GameUICenter.messageQueue.PrepareMessage(pack.Header, pack.Message,
+                DissmissCurrentEmployee, () => { });
+        }
+        else
+        {
+            DissmissCurrentEmployee();
+        }
     }
     public void DissmissCurrentEmployee()
     {
@@ -246,10 +251,10 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
         {
             if (CurrentEmployee != null)
             {
-                CurrentEmployee.employeeChanged -= RedrawCurrentEmployeeInfo;
+                CurrentEmployee.EmployeeInfoChanged -= RedrawCurrentEmployeeInfo;
             }
             CurrentEmployee = e;
-            e.employeeChanged += RedrawCurrentEmployeeInfo;
+            e.EmployeeInfoChanged += RedrawCurrentEmployeeInfo;
             RedrawCurrentEmployeeInfo();
         }
     }
@@ -277,10 +282,12 @@ public class ResourcePanel : MonoBehaviour, IUIPanel
     {
         if(CurrentEmployee != null)
         {
+            fatigueSlider.maxValue = CurrentEmployee.EmployeeStatsPack.fatigueThresholdValue;
+            stressSlider.maxValue = CurrentEmployee.EmployeeStatsPack.stressThresholdValue;
             stressSlider.value = CurrentEmployee.Stress;
             fatigueSlider.value = CurrentEmployee.Fatigue;
             nameText.text = CurrentEmployee.Name;
-            stateText.text = CurrentEmployee.SalaryState;
+            stateText.text = CurrentEmployee.SalaryStrategyName;
             paymentText.text = CurrentEmployee.GetSalaryInfo();
         }
     }

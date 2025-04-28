@@ -4,39 +4,87 @@ using UnityEngine;
 
 public class EmployeeTaskSystem : MonoBehaviour
 {
-    [SerializeField]
+    #region Поля и свойства
+
+    /// <summary>
+    /// Пакет с информацией о задачах
+    /// </summary>
     public TaskDB taskDB;
 
-    private Dictionary<Employee, List<EmployeeTask>> employeesAndTasks = 
-        new Dictionary<Employee, List<EmployeeTask>>();
-    public List<EmployeeTask> Backlog { get; private set; }  = new List<EmployeeTask>();
+    /// <summary>
+    /// Список задач, которые можно назначить сотрудникам
+    /// </summary>
+    public List<EmployeeTask> Backlog { get; private set; } = new List<EmployeeTask>();
 
-    public event Action<EmployeeTask> incorrectTaskFound;
-    public event Action<EmployeeTask> taskToBaclog;
-    public event Action taskTick;
-    public event Action projectComplete;
-
+    private readonly Dictionary<Employee, List<EmployeeTask>> employeesAndTasks = new();
     private bool endOfProject = false;
 
+    #endregion
+
+    #region События
+
+    public event Action<EmployeeTask> IncorrectTaskFound;
+    public event Action<EmployeeTask> TaskToBaclog;
+    public event Action ProjectComplete;
+
+    #endregion
+
+    #region Методы
+
+    public void SubscribeEvents(EmployeeSystem employeeSystem, TimeSystem timeSystem)
+    {
+        employeeSystem.TeamChanged += OnEmployeeListChanged;
+        employeeSystem.DismissEmployeeEvent += OnDismissEmployee;
+        timeSystem.SpendTime += OnSkipTime;
+    }
     public void SetUp()
     {
         Backlog.AddRange(taskDB.GetEmployeeTasks());
     }
 
+    /// <summary>
+    /// Добавить список задач в бэклог
+    /// </summary>
+    /// <param name="tasks">Новые задачи</param>
     public void AddTasksToBackLog(List<EmployeeTask> tasks)
     {
         Backlog.AddRange(tasks);
         foreach (EmployeeTask task in tasks)
         {
-            taskToBaclog?.Invoke(task);
+            TaskToBaclog?.Invoke(task);
         }
     }
 
-    public void SubscribeEvents(EmployeeSystem employeeSystem, TimeSystem timeSystem)
+    /// <summary>
+    /// Добавить сотруднику новую задачу
+    /// </summary>
+    /// <param name="employee">Сотрудник</param>
+    /// <param name="employeeTask">Задача</param>
+    public void AddTaskToEmployee(Employee employee, EmployeeTask employeeTask)
     {
-        employeeSystem.teamChanged += OnEmployeeListChanged;
-        employeeSystem.dismissEmployee += OnDismissEmployee;
-        timeSystem.spendTime += OnSkipTime;
+        employeesAndTasks[employee].Add(employeeTask);
+        Backlog.Remove(employeeTask);
+    }
+    /// <summary>
+    /// Убрать задачу у сотрудника
+    /// </summary>
+    /// <param name="employee">Сотрудник</param>
+    /// <param name="task">Задача</param>
+    public void RemoveTaskFromEmployee(Employee employee, EmployeeTask task)
+    {
+        if (employeesAndTasks[employee].Contains(task))
+        {
+            employeesAndTasks[employee].Remove(task);
+            Backlog.Add(task);
+        }
+    }
+
+    /// <summary>
+    /// Запустить ожидание окончания проекта
+    /// </summary>
+    public void PrepareFinalizeProject()
+    {
+        endOfProject = true;
     }
 
     private void OnSkipTime(int minutes)
@@ -46,42 +94,74 @@ public class EmployeeTaskSystem : MonoBehaviour
             AllDoTasks();
         }
     }
+    private void OnEmployeeListChanged(List<Employee> employees)
+    {
+        foreach (Employee employee in employees)
+        {
+            if (!employeesAndTasks.ContainsKey(employee))
+            {
+                employeesAndTasks.Add(employee, new List<EmployeeTask>());
+            }
+        }
+    }
+    private void OnDismissEmployee(Employee employee)
+    {
+        if (employeesAndTasks.ContainsKey(employee))
+        {
+            List<EmployeeTask> tasks = new();
+
+            if (employee.CurrentTask != null)
+            {
+                employee.CurrentTask.ResetProgress();
+                tasks.Add(employee.CurrentTask);
+            }
+            tasks.AddRange(employeesAndTasks[employee]);
+            Backlog.AddRange(tasks);
+            employeesAndTasks.Remove(employee);
+
+            foreach (var item in tasks)
+            {
+                TaskToBaclog?.Invoke(item);
+            }
+        }
+    }
+
 
     private void AllDoTasks()
     {
         foreach (Employee e in employeesAndTasks.Keys)
         {
-            if(e.CurrentTask == null && employeesAndTasks[e].Count > 0)
+            if (e.CurrentTask == null && employeesAndTasks[e].Count > 0)
             {
                 e.CurrentTask = employeesAndTasks[e][0];
                 employeesAndTasks[e].Remove(e.CurrentTask);
 
                 GameUICenter.messageQueue.Log(e.Name + " берёт задачу " + e.CurrentTask.Name);
 
-                if(e.CurrentTask.Type == EmployeeTaskType.Testing)
+                if (e.CurrentTask.Type == EmployeeTaskType.Testing)
                 {
-                    e.CurrentTask.StartTestingThisTask(e);
+                    e.CurrentTask.SetTesterToThisTask(e);
                 }
                 else
                 {
-                    e.CurrentTask.StartThisTask(e);
+                    e.CurrentTask.SetWorkerToThisTask(e);
                 }
             }
-            else if(e.CurrentTask != null)
+            else if (e.CurrentTask != null)
             {
-                if(e.CurrentTask.IsReady())
+                if (e.CurrentTask.IsReady())
                 {
                     GameUICenter.messageQueue.Log(e.Name + " выполняет задачу " + e.CurrentTask.Name);
-          
+
 
                     if (e.CurrentTask.Testing)
                     {
-                        if(!e.CurrentTask.EndTestingThisTask(e))
+                        if (!e.CurrentTask.FinalTestingThisTask())
                         {
                             Backlog.Add(e.CurrentTask);
-                            taskToBaclog?.Invoke(e.CurrentTask);
-                            incorrectTaskFound?.Invoke(e.CurrentTask);
-                            GameUICenter.messageQueue.Log(e.Name + " сообщает, что задача " + 
+                            TaskToBaclog?.Invoke(e.CurrentTask);
+                            IncorrectTaskFound?.Invoke(e.CurrentTask);
+                            GameUICenter.messageQueue.Log(e.Name + " сообщает, что задача " +
                                 e.CurrentTask.Name + " выполнена некорректно.");
                         }
 
@@ -91,9 +171,9 @@ public class EmployeeTaskSystem : MonoBehaviour
                     }
                     else
                     {
-                        e.CurrentTask.EndWorkForThisTask(e);
+                        e.CurrentTask.FinalWorkForThisTask();
                         Backlog.Add(e.CurrentTask);
-                        taskToBaclog?.Invoke(e.CurrentTask);
+                        TaskToBaclog?.Invoke(e.CurrentTask);
                         employeesAndTasks[e].Remove(e.CurrentTask);
 
                         e.CurrentTask = null;
@@ -106,61 +186,9 @@ public class EmployeeTaskSystem : MonoBehaviour
             }
         }
     }
-
-    public void AddTaskToEmployee(Employee employee, EmployeeTask employeeTask)
-    {
-        employeesAndTasks[employee].Add(employeeTask);
-        Backlog.Remove(employeeTask);
-    }
-    public void RemoveTaskFromEmployee(Employee employee, EmployeeTask task)
-    {
-        if (employeesAndTasks[employee].Contains(task))
-        {
-            employeesAndTasks[employee].Remove(task);
-            Backlog.Add(task);
-        }
-    }
-
-    public void PrepareEndProject()
-    {
-        endOfProject = true;
-    }
-
-    private void OnEmployeeListChanged(List<Employee> employees)
-    {
-        foreach (Employee employee in employees)
-        {
-            if(!employeesAndTasks.ContainsKey(employee))
-            {
-                employeesAndTasks.Add(employee, new List<EmployeeTask>());
-            }
-        }
-    }
-    private void OnDismissEmployee(Employee employee)
-    {
-        if(employeesAndTasks.ContainsKey(employee))
-        {
-            List<EmployeeTask> tasks = new List<EmployeeTask>();
-            
-            if(employee.CurrentTask != null)
-            {
-                employee.CurrentTask.ResetProgress();
-                tasks.Add(employee.CurrentTask);
-            }
-            tasks.AddRange(employeesAndTasks[employee]);
-            Backlog.AddRange(tasks);
-            employeesAndTasks.Remove(employee);
-
-            foreach (var item in tasks)
-            {
-                taskToBaclog?.Invoke(item);
-            }
-        }
-    }
-
     private void CheckProgress()
     {
-        if(Backlog.Count > 0)
+        if (Backlog.Count > 0)
         {
             return;
         }
@@ -172,16 +200,16 @@ public class EmployeeTaskSystem : MonoBehaviour
                 return;
             }
 
-            if(task.Key.CurrentTask != null)
+            if (task.Key.CurrentTask != null)
             {
                 return;
             }
         }
 
-        if(endOfProject)
+        if (endOfProject)
         {
             GameUICenter.messageQueue.PrepareMessage("Успех!", "Вы справились со всеми задачами!");
-            projectComplete?.Invoke();
+            ProjectComplete?.Invoke();
         }
         else
         {
@@ -189,4 +217,6 @@ public class EmployeeTaskSystem : MonoBehaviour
                 " Надо показать текущий прогресс заказчику. Может, будут правки!");
         }
     }
+
+    #endregion
 }

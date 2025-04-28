@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class GameCenter : MonoBehaviour
 {
+    [SerializeField]
+    private EmployeeProjectData projectData;
+
     private void Start()
     {
         TimeSystem timeSystem = FindObjectOfType<TimeSystem>();
@@ -35,13 +38,13 @@ public class GameCenter : MonoBehaviour
 
         overtimeSelectorPanel.SetUp();
         timerDisplay.SetUp();
-        financeSystem.SetUp();
+        financeSystem.SetUp(projectData);
         employeeSystem.SetUp();
         employeeTaskSystem.SetUp();
         taskPanel.SetUp(employeeSystem);
         resourcePanel.SetUp();
         timeSkipPanel.SetUp();
-        timeSystem.SetUp();
+        timeSystem.SetUp(projectData);
     }
 }
 

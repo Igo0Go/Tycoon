@@ -20,9 +20,9 @@ public class TaskPanel : MonoBehaviour, IUIPanel
     public void SubscribeEvents(EmployeeTaskSystem employeeTaskSystem, EmployeeSystem employeeSystem)
     {
         taskSystem = employeeTaskSystem;
-        taskSystem.taskToBaclog += SpawnTaskCard;
-        employeeSystem.dismissEmployee += OnEmployeeRemove;
-        employeeSystem.newEmployee += SpawnEmployee;
+        taskSystem.TaskToBaclog += SpawnTaskCard;
+        employeeSystem.DismissEmployeeEvent += OnEmployeeRemove;
+        employeeSystem.NewEmployee += SpawnEmployee;
     }
 
     public void SetUp(EmployeeSystem employeeSystem)

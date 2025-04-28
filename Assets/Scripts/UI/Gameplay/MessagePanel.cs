@@ -42,9 +42,9 @@ public class MessagePanel : MonoBehaviour
         okButton.onClick.AddListener(OnOkButtonClick);
         yesButton.onClick.AddListener(OnYesButtonClick);
         noButton.onClick.AddListener(OnNoButtonClick);
-        messageQueue.messageReceived += ShowMessage;
-        messageQueue.noMoreMessages += () => panel.SetActive(false);
-        messageQueue.newLog += AddLogItem;
+        messageQueue.MessageReceived += ShowMessage;
+        messageQueue.NoMoreMessages += () => panel.SetActive(false);
+        messageQueue.NewLog += AddLogItem;
         HideAll();
         logPanel.SetActive(false);
     }

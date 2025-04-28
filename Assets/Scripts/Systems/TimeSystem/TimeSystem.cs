@@ -1,57 +1,13 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class TimeSystem : MonoBehaviour
 {
-    [SerializeField, Range(1, 1000)]
-    private float timeSpeed = 1;
+    #region Свойства
 
-    [Space(20)]
-    [SerializeField, TextArea(5, 10)]
-    private string startDayMessage;
-    [SerializeField, TextArea(5, 10)]
-    private string lunchMessage;
-    [SerializeField, TextArea(5, 10)]
-    private string endWorkMessage;
-    [SerializeField, TextArea(5, 10)]
-    private string endDayMessage;
-    [SerializeField, TextArea(5, 10)]
-    private string overtimePrepareMessage;
-
-    [Space(20)]
-    [SerializeField]
-    private int startDayHour = 9;
-    [SerializeField]
-    private int startLunchHour = 13;
-    [SerializeField]
-    private int endLunchHour = 14;
-    [SerializeField]
-    private int endWorkDayHour = 18;
-    [SerializeField]
-    private int endDayHour = 0;
-
-    [SerializeField, Min(1)]
-    private int projectDayLimit = 20;
-    [SerializeField]
-    private List<DayEvent> dayEvents = new List<DayEvent>();
-
-    public event Action<int> hoursChanged;
-    public event Action<int> minutesChanged;
-    public event Action<DateTime> dateChanged;
-    public event Action<int> spendTime;
-    public event Action<int> currentDayChanged;
-
-
-    public event Action startNewDay;
-    public event Action startWork;
-    public event Action endWork;
-    public event Action startLunch;
-    public event Action overtimeAccepted;
-    public event Action startOvertime;
-    public event Action endDay;
-
+    /// <summary>
+    /// Текущий час. При изменении испускает событие HourChanged. Вызывает проверку части дня.
+    /// </summary>
     public int CurrentHour
     {
         get
@@ -61,12 +17,16 @@ public class TimeSystem : MonoBehaviour
         set
         {
             _currentHour = Math.Clamp(value, 0, 23);
-            hoursChanged?.Invoke(_currentHour);
+            HoursChanged?.Invoke(_currentHour);
             CheckDatePart();
         }
     }
     private int _currentHour;
 
+    /// <summary>
+    /// Текущая минута. При изменении испускает событие MinuteChanged.
+    /// При нарастании больше 59 прибавляет час. Вызывает проверку части дня
+    /// </summary>
     public int CurrentMinute
     {
         get
@@ -77,21 +37,24 @@ public class TimeSystem : MonoBehaviour
         {
             _currentMinute = value;
 
-            if(CurrentMinute >= cycle)
+            if (CurrentMinute >= minuteCycle)
             {
                 _currentMinute = 0;
                 _currentHour++;
-                if(_currentHour >= hourCycle)
+                if (_currentHour >= hourCycle)
                 {
                     _currentHour = 0;
                 }
                 CheckDatePart();
             }
-            minutesChanged?.Invoke(_currentMinute);
+            MinuteChanged?.Invoke(_currentMinute);
         }
     }
     private int _currentMinute;
 
+    /// <summary>
+    /// Текущая дата. При изменении испускает событие DateChanged
+    /// </summary>
     public DateTime CurrentDate
     {
         get
@@ -101,27 +64,86 @@ public class TimeSystem : MonoBehaviour
         set
         {
             _currentDate = value;
-            dateChanged?.Invoke(_currentDate);
+            DateChanged?.Invoke(_currentDate);
         }
     }
     private DateTime _currentDate;
+    #endregion
 
-    public const int cycle = 60;
-    public const int hourCycle = 24;
+    #region Поля
 
-    private const int prepareOvertimeHour = 17;
+    /// <summary>
+    /// текущая скорость течения времени
+    /// </summary>
+    [SerializeField, Range(1, 1000)]
+    private float timeSpeed = 1;
 
-    private DayPart currentDayPart;
+    /// <summary>
+    /// Набор с сообщениями частей дня
+    /// </summary>
+    [Space(20)]
+    [SerializeField]
+    private DayPartMessagePack dayPartMessagePack;
+
+    private EmployeeProjectData projectData;
+
+
+    //Рабочие
     private bool useTime;
-    private float t = 0;
     private bool financeLost = false;
-
+    private float timer = 0;
     private int currentDayCount = 0;
+    private DayPart currentDayPart;
+    #endregion
 
+    #region Константы
+    private const int startDayHour = 9;
+    private const int startLunchHour = 13;
+    private const int endLunchHour = 14;
+    private const int prepareOvertimeHour = 17;
+    private const int endWorkDayHour = 18;
+    private const int endDayHour = 0;
+
+    public const int minuteCycle = 60;
+    public const int hourCycle = 24;
+    #endregion
+
+    #region События
+    public event Action<int> HoursChanged;
+    public event Action<int> MinuteChanged;
+    public event Action<DateTime> DateChanged;
+    public event Action<int> SpendTime;
+    public event Action<int> ProjectDayLimitChanged;
+
+    public event Action NewDayBeginning;
+    public event Action StartWork;
+    public event Action EndWork;
+    public event Action StartLunch;
+    public event Action OvertimeAccepted;
+    public event Action StartOvertime;
+    public event Action EndOfDay;
+    #endregion
+
+    #region Методы
     public void SubscribeEvents(EmployeeTaskSystem taskSystem, FinanceSystem financeSystem)
     {
-        taskSystem.projectComplete += () => useTime = false;
-        financeSystem.financeLost += (value) => financeLost = value;
+        taskSystem.ProjectComplete += () => useTime = false;
+        financeSystem.FinanceLost += (value) => financeLost = value;
+    }
+
+    public void SetUp(EmployeeProjectData employeeProjectData)
+    {
+        projectData = employeeProjectData;
+        CurrentDate = DateTime.Now;
+        TimeSettings.TimeSpeed = timeSpeed;
+        CurrentHour = 9;
+        CurrentMinute = 0;
+        useTime = true;
+        NewDayBeginning?.Invoke();
+        StartWork?.Invoke();
+        GameUICenter.messageQueue.PrepareMessage(dayPartMessagePack.startDayMessage.Header,
+            dayPartMessagePack.startDayMessage.Message);
+        CheckDayEvents();
     }
 
     /// <summary>
@@ -132,13 +154,13 @@ public class TimeSystem : MonoBehaviour
     /// <returns>-1 если целевое время раньше текущего, 0 - если равны, 1 - если позже</returns>
     public int EqulasTime(int hour, int minute)
     {
-        if(hour < CurrentHour)
+        if (hour < CurrentHour)
         {
             return -1;
         }
-        else if(hour == CurrentHour)
+        else if (hour == CurrentHour)
         {
-            if(minute < CurrentMinute)
+            if (minute < CurrentMinute)
             {
                 return -1;
             }
@@ -157,90 +179,77 @@ public class TimeSystem : MonoBehaviour
         }
     }
 
-    public void SetUp()
-    {
-        CurrentDate = DateTime.Now;
-        TimeSettings.TimeSpeed = timeSpeed;
-        CurrentHour = 9;
-        CurrentMinute = 0;
-        useTime = true;
-        startNewDay?.Invoke();
-        startWork?.Invoke();
-        GameUICenter.messageQueue.PrepareMessage("Новый день!", startDayMessage);
-        CheckDayEvents();
-    }
-
-    private void Update()
-    {
-        if (useTime)
-        {
-            t += Time.deltaTime * TimeSettings.TimeSpeed * TimeSettings.TimeSpeedMultiplier;
-
-            if (t >= cycle)
-            {
-                CurrentMinute++;
-                spendTime?.Invoke(1);
-                t = 0;
-            }
-        }
-        ChangeSpeed();
-    }
-
+    /// <summary>
+    /// Запустить новый день с проверкой выходных и лимита дней на проект
+    /// </summary>
     public void StartNewDay()
     {
         CurrentHour = 9;
         CurrentMinute = 0;
         useTime = true;
-        startNewDay?.Invoke();
-        startWork?.Invoke();
+        NewDayBeginning?.Invoke();
+        StartWork?.Invoke();
 
-        if(CurrentDate.DayOfWeek == DayOfWeek.Friday)
+        if (CurrentDate.DayOfWeek == DayOfWeek.Friday)
         {
             CurrentDate = CurrentDate.AddDays(3);
             currentDayCount += 3;
-            currentDayChanged?.Invoke( projectDayLimit - currentDayCount);
         }
         else
         {
             CurrentDate = CurrentDate.AddDays(1);
             currentDayCount += 1;
-            currentDayChanged?.Invoke(projectDayLimit - currentDayCount);
         }
+        ProjectDayLimitChanged?.Invoke(projectData.projectDayLimit - currentDayCount);
 
-        if(currentDayCount > projectDayLimit)
+        if (currentDayCount > projectData.projectDayLimit)
         {
-            GameUICenter.messageQueue.PrepareMessage("Время вышло!", "Время на выполнение проекта истекло! Конец игры");
+            GameUICenter.messageQueue.PrepareMessage(projectData.lostTimeMessage.Header,
+                projectData.lostTimeMessage.Message);
             useTime = false;
         }
         else
         {
-            GameUICenter.messageQueue.PrepareMessage("Новый день!", startDayMessage);
+            GameUICenter.messageQueue.PrepareMessage(dayPartMessagePack.startDayMessage.Header,
+                dayPartMessagePack.startDayMessage.Message);
             CheckDayEvents();
         }
     }
 
+    /// <summary>
+    /// Пропустить обед, сразу перейдя ко времени его окончания
+    /// </summary>
     public void SkipLunch()
     {
-        if(CurrentHour < endLunchHour)
+        if (CurrentHour < endLunchHour)
         {
             _currentMinute = 0;
             CurrentHour = endLunchHour;
+            StartWork?.Invoke();
         }
     }
 
+    /// <summary>
+    /// Закончить день и начать новый с проверкой того, остались ли деньги
+    /// </summary>
     public void EndDay()
     {
-        endDay?.Invoke();
+        EndOfDay?.Invoke();
         StartNewDay();
 
-        if(financeLost)
+        if (financeLost)
         {
-            GameUICenter.messageQueue.PrepareMessage("Вот и всё, ребята", "Чуда не случилось. Деньги кончились. " +
-                "И новых средств ждать не стоит. Пора закрываться. \n\n Конец игры");
+            GameUICenter.messageQueue.PrepareMessage(projectData.lostTimeMessage.Header,
+                projectData.lostTimeMessage.Message);
             useTime = false;
         }
     }
 
+    /// <summary>
+    /// Переключить время к конкретному часу и минуте
+    /// </summary>
+    /// <param name="targetHour">целевой час</param>
+    /// <param name="targetMinute">целевая минута</param>
     public void SkipTimeToThis(int targetHour, int targetMinute)
     {
         int totalMinutes = 0;
@@ -248,22 +257,22 @@ public class TimeSystem : MonoBehaviour
         int hour = _currentHour;
         int minute = _currentMinute;
 
-        while(!(hour==targetHour && minute == targetMinute))
+        while (!(hour == targetHour && minute == targetMinute))
         {
-            if(hour < startLunchHour || hour >= endLunchHour)
+            if (hour < startLunchHour || hour >= endLunchHour)
             {
                 totalMinutes++;
             }
             minute++;
 
-            if(minute >= cycle)
+            if (minute >= minuteCycle)
             {
                 hour++;
                 minute = 0;
             }
         }
 
-        spendTime?.Invoke(totalMinutes);
+        SpendTime?.Invoke(totalMinutes);
 
         CurrentHour = hour;
         CurrentMinute = minute;
@@ -271,79 +280,91 @@ public class TimeSystem : MonoBehaviour
         CheckDatePart();
     }
 
+    /// <summary>
+    /// Проверить часть дня. Пойти на обед, запустить выбор сверхурочных и т.д.
+    /// </summary>
     private void CheckDatePart()
     {
         if ((CurrentHour >= startDayHour && CurrentHour < startLunchHour) ||
             (CurrentHour >= endLunchHour && CurrentHour < endWorkDayHour))
         {
-            if(currentDayPart != DayPart.Work)
+            if (currentDayPart != DayPart.Work)
             {
                 currentDayPart = DayPart.Work;
-                startWork?.Invoke();
+                StartWork?.Invoke();
             }
         }
         else if (CurrentHour >= startLunchHour && CurrentHour < endLunchHour)
         {
-            if(currentDayPart != DayPart.Lunch)
+            if (currentDayPart != DayPart.Lunch)
             {
                 currentDayPart = DayPart.Lunch;
-                startLunch?.Invoke();
-                GameUICenter.messageQueue.PrepareMessage("На обед!", lunchMessage, SkipLunch, () => { });
+                StartLunch?.Invoke();
+                GameUICenter.messageQueue.PrepareMessage(dayPartMessagePack.lunchMessage.Header,
+                    dayPartMessagePack.lunchMessage.Message, SkipLunch, () => { });
             }
         }
 
         if (CurrentHour >= prepareOvertimeHour && CurrentHour < endWorkDayHour)
         {
-            GameUICenter.messageQueue.PrepareMessage("Успеваем?", overtimePrepareMessage, () => { overtimeAccepted?.Invoke(); }, null);
+            GameUICenter.messageQueue.PrepareMessage(dayPartMessagePack.overtimePrepareMessage.Header,
+                dayPartMessagePack.overtimePrepareMessage.Message, () => { OvertimeAccepted?.Invoke(); }, null);
         }
         else if (CurrentHour >= endWorkDayHour)
         {
-            if(currentDayPart != DayPart.HomeTime)
+            if (currentDayPart != DayPart.HomeTime)
             {
                 currentDayPart = DayPart.HomeTime;
-                endWork?.Invoke();
-                GameUICenter.messageQueue.PrepareMessage("Пока-пока!", endWorkMessage, EndDay, () => { startOvertime?.Invoke(); });
+                EndWork?.Invoke();
+                GameUICenter.messageQueue.PrepareMessage(dayPartMessagePack.endWorkMessage.Header,
+                    dayPartMessagePack.endWorkMessage.Message, EndDay, () => { StartOvertime?.Invoke(); });
             }
         }
         else if (CurrentHour >= endDayHour && CurrentHour < startDayHour)
         {
             currentDayPart = DayPart.HomeTime;
-            endDay?.Invoke();
-            GameUICenter.messageQueue.PrepareMessage("Вы что-то заседелись", endDayMessage, EndDay);
+            GameUICenter.messageQueue.PrepareMessage(dayPartMessagePack.endDayMessage.Header,
+                dayPartMessagePack.endDayMessage.Message, EndDay);
         }
     }
 
+    /// <summary>
+    /// Проверит события этого дня проекта
+    /// </summary>
     private void CheckDayEvents()
     {
-        for (int i = 0; i < dayEvents.Count; i++)
+        for (int i = 0; i < projectData.dayEvents.Count; i++)
         {
-            DayEvent currentEvent = dayEvents[i];
+            DayEvent currentEvent = projectData.dayEvents[i];
 
-            if(currentDayCount >= currentEvent.day)
+            if (currentDayCount >= currentEvent.day)
             {
-                GameUICenter.messageQueue.PrepareMessage(currentEvent.Header, currentEvent.Message);
+                GameUICenter.messageQueue.PrepareMessage(currentEvent.messageData.Header, currentEvent.messageData.Message);
                 currentEvent.onDayEvent.Invoke();
-                dayEvents.RemoveAt(i);
+                projectData.dayEvents.RemoveAt(i);
                 i--;
             }
         }
     }
 
+    /// <summary>
+    /// Изменить скорость течения времени по кнопке
+    /// </summary>
     private void ChangeSpeed()
     {
-        if(Input.GetKeyDown(KeyCode.Alpha1))
+        if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             TimeSettings.TimeSpeedMultiplier = 1;
         }
-        else if(Input.GetKeyDown(KeyCode.Alpha2))
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             TimeSettings.TimeSpeedMultiplier = 2;
         }
-        else if(Input.GetKeyDown(KeyCode.Alpha3))
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
         {
             TimeSettings.TimeSpeedMultiplier = 4;
         }
-        else if(Input.GetKeyDown(KeyCode.Alpha4))
+        else if (Input.GetKeyDown(KeyCode.Alpha4))
         {
             TimeSettings.TimeSpeedMultiplier = 10;
         }
@@ -352,17 +373,26 @@ public class TimeSystem : MonoBehaviour
             TimeSettings.TimeSpeedMultiplier = 100;
         }
     }
+    #endregion
+
+    private void Update()
+    {
+        if (useTime)
+        {
+            timer += Time.deltaTime * TimeSettings.TimeSpeed * TimeSettings.TimeSpeedMultiplier;
+
+            if (timer >= minuteCycle)
+            {
+                CurrentMinute++;
+                SpendTime?.Invoke(1);
+                timer = 0;
+            }
+        }
+        ChangeSpeed();
+    }
 }
 
-[System.Serializable]
-public class DayEvent
-{
-    public string Header;
-    [TextArea(5,10)]
-    public string Message;
-    public int day;
-    public UnityEvent onDayEvent;
-}
+
 
 public static class TimeSettings
 {
@@ -377,16 +407,16 @@ public static class TimeSettings
         set
         {
             _timeSpeedMultiplier = value;
-            timeSpeedChanged?.Invoke(_timeSpeedMultiplier);
+            TimeSpeedChanged?.Invoke(_timeSpeedMultiplier);
         }
     }
     private static float _timeSpeedMultiplier = 1;
 
     public static void ClearEvents()
     {
-        timeSpeedChanged = null;
+        TimeSpeedChanged = null;
     }
-    public static event Action<float> timeSpeedChanged;
+    public static event Action<float> TimeSpeedChanged;
 }
 
 public enum DayPart

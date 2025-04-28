@@ -3,6 +3,7 @@ using UnityEngine;
 public class TaskPackActivator : MonoBehaviour
 {
     [SerializeField]
+    [Tooltip("Пакет с информацией о задачах")]
     private TaskDB taskDB;
 
     private EmployeeTaskSystem employeeTaskSystem;

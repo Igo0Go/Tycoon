@@ -4,102 +4,124 @@ using UnityEngine;
 
 public class EmployeeSystem : MonoBehaviour
 {
+    #region Поля и свойства
     [SerializeField]
+    [Tooltip("Пакет с командой сотрудников")]
     private EmployeeTeam team;
 
-    [SerializeField, TextArea(5, 10)]
-    private string employeeMaxStressMessege;
+    [SerializeField]
+    [Tooltip("Пакет с настройками статистик сотрудников")]
+    private EmployeeStatsSettingsPack statsSettingsPack;
 
-    [SerializeField, TextArea(5, 10)]
-    private string employeeMaxFatigueMessege;
-
+    /// <summary>
+    /// Коллекция сотрудников
+    /// </summary>
     public List<Employee> Employees
     {
         get
         {
-            if(_employees == null)
-            {
-                _employees = team.GetEmployees();
-            }
+            _employees ??= team.GetEmployees();
             return _employees;
         }
     }
-        private List<Employee> _employees;
+    private List<Employee> _employees;
 
+    /// <summary>
+    /// Коллекция рекрутов
+    /// </summary>
     public List<Employee> Recruts
     {
         get
         {
-            if (_recruts == null)
-            {
-                _recruts = team.GetRecruts();
-            }
+            _recruts ??= team.GetRecruts();
             return _recruts;
         }
     }
     private List<Employee> _recruts;
+    #endregion
 
-    public event Action<List<Employee>> teamChanged;
-    public event Action<List<Employee>> recrutsChanged;
-    public event Action<Employee> dismissEmployee;
-    public event Action<Employee> newEmployee;
+    #region События
+    public event Action<List<Employee>> TeamChanged;
+    public event Action<List<Employee>> RecrutsChanged;
+    public event Action<Employee> DismissEmployeeEvent;
+    public event Action<Employee> NewEmployee;
+    #endregion
 
+    #region Методы
+
+    #region Общие
     public void SubscribeEvents(TimeSystem timeSystem)
     {
-        timeSystem.startNewDay += AllStartDay;
-        timeSystem.startWork += AllToWork;
-        timeSystem.startLunch += AllToLunch;
-        timeSystem.endWork += EmployeesGoHome;
-        timeSystem.endDay += AllGoHome;
+        timeSystem.NewDayBeginning += AllStartDay;
+        timeSystem.StartWork += AllToWork;
+        timeSystem.StartLunch += AllToLunch;
+        timeSystem.EndWork += NotOvertimeEmployeesGoHome;
+        timeSystem.EndOfDay += AllGoHome;
 
-        teamChanged?.Invoke(Employees);
+        TeamChanged?.Invoke(Employees);
 
         foreach (Employee e in Employees)
         {
-            e.employeeChanged += OnEmployeeChanged;
-            e.employeeMaxFatigue += OnEmployeeMaxFatigue;
-            e.employeeMaxStress += OnEmployeeMaxStress;
+            e.EmployeeInfoChanged += OnEmployeeChanged;
+            e.EmployeeMaxFatigue += OnEmployeeMaxFatigue;
+            e.EmployeeMaxStress += OnEmployeeMaxStress;
         }
         foreach (Employee e in Recruts)
         {
-            e.employeeRecruting += AddRecrutToTeam;
+            e.EmployeeRecruting += AddRecrutToTeam;
         }
     }
     public void SetUp()
     {
-        teamChanged?.Invoke(Employees);
+        statsSettingsPack.AcceptThisSettings();
+        TeamChanged?.Invoke(Employees);
     }
 
+    /// <summary>
+    /// Уволить сотрудник
+    /// </summary>
+    /// <param name="employee">Сотрудник на увольнение</param>
     public void DismissEmployee(Employee employee)
     {
         Employees.Remove(employee);
-        teamChanged?.Invoke(Employees);
-        dismissEmployee?.Invoke(employee);
+        TeamChanged?.Invoke(Employees);
+        DismissEmployeeEvent?.Invoke(employee);
     }
 
+    /// <summary>
+    /// Добавить рекрута в команду, потратив средства на привлечение
+    /// </summary>
+    /// <param name="e">Сотрудник для рекрутирование</param>
     public void AddRecrutToTeam(Employee e)
     {
-        e.employeeRecruting -= AddRecrutToTeam;
+        e.EmployeeRecruting -= AddRecrutToTeam;
 
         Recruts.Remove(e);
         Employees.Add(e);
 
-        e.employeeChanged += OnEmployeeChanged;
-        e.employeeMaxFatigue += OnEmployeeMaxFatigue;
-        e.employeeMaxStress += OnEmployeeMaxStress;
+        e.EmployeeInfoChanged += OnEmployeeChanged;
+        e.EmployeeMaxFatigue += OnEmployeeMaxFatigue;
+        e.EmployeeMaxStress += OnEmployeeMaxStress;
 
-        teamChanged?.Invoke(Employees);
-        recrutsChanged?.Invoke(Recruts);
-        newEmployee?.Invoke(e);
-        e.ToWork();
+        TeamChanged?.Invoke(Employees);
+        RecrutsChanged?.Invoke(Recruts);
+        NewEmployee?.Invoke(e);
+        e.GoToWork();
     }
+    #endregion
 
+    #region Команды всем сотрудникам
+    /// <summary>
+    /// Стартовать новый день для всех сотрудников, проверить максимальные статистики. 
+    /// Человек с максимльным стрессом уволиться. 
+    /// Человек с максимальной усталостью проспит
+    /// </summary>
     private void AllStartDay()
     {
         for (int i = 0; i < Employees.Count; i++)
         {
             Employee e = Employees[i];
-            if(e.EmployeeWantFireCheck())
+            if(e.EmployeeMaxStatsCheck())
             {
                 e.SetBaseSalaryStatus();
             }
@@ -109,26 +131,50 @@ public class EmployeeSystem : MonoBehaviour
                 i--;
             }
         }
-        teamChanged?.Invoke(Employees);
+        TeamChanged?.Invoke(Employees);
     }
+
+    /// <summary>
+    /// Отправить всех работать, установив базовую стратегию оплаты
+    /// </summary>
     private void AllToWork()
     {
         foreach (Employee e in Employees)
         {
             e.SetBaseSalaryStatus();
-            e.ToWork();
+            e.GoToWork();
         }
-        teamChanged?.Invoke(Employees);
+        TeamChanged?.Invoke(Employees);
     }
-    private void EmployeesGoHome()
+
+    /// <summary>
+    /// Отправить всех на обед
+    /// </summary>
+    private void AllToLunch()
+    {
+        foreach (Employee e in Employees)
+        {
+            e.GoToLunch();
+        }
+    }
+
+    /// <summary>
+    /// Отправить домой сотрудников, которые не работают сверхурочно
+    /// </summary>
+    private void NotOvertimeEmployeesGoHome()
     {
         foreach (Employee e in Employees)
         {
             if(!e.OverTime)
                 e.GoHome();
         }
-        teamChanged?.Invoke(Employees);
+        TeamChanged?.Invoke(Employees);
     }
+
+    /// <summary>
+    /// Для каждого сотрудника подсчитать результаты дня, установить базовую 
+    /// стратегию оплаты и отправить домой
+    /// </summary>
     private void AllGoHome()
     {
         foreach (Employee e in Employees)
@@ -137,26 +183,26 @@ public class EmployeeSystem : MonoBehaviour
             e.SetBaseSalaryStatus();
             e.GoHome();
         }
-        teamChanged?.Invoke(Employees);
+        TeamChanged?.Invoke(Employees);
     }
-    private void AllToLunch()
-    {
-        foreach(Employee e in Employees)
-        {
-            e.ToLunch();
-        }
-    }
+    #endregion
 
+    #region Реакции на события
     private void OnEmployeeChanged()
     {
-        teamChanged?.Invoke(Employees);
+        TeamChanged?.Invoke(Employees);
     }
     private void OnEmployeeMaxStress(Employee e)
     {
-        GameUICenter.messageQueue.PrepareMessage(e.Name + " уволняется", employeeMaxStressMessege);
+        MessagePanelPack pack = e.GetMaxStressPack();
+        GameUICenter.messageQueue.PrepareMessage(pack.Header, pack.Message);
     }
     private void OnEmployeeMaxFatigue(Employee e)
     {
-        GameUICenter.messageQueue.PrepareMessage(e.Name + " не вышел на работу", employeeMaxFatigueMessege);
+        MessagePanelPack pack = e.GetMaxFatiguePack();
+        GameUICenter.messageQueue.PrepareMessage(pack.Header, pack.Message);
     }
+    #endregion
+
+    #endregion
 }

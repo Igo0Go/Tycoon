@@ -3,16 +3,30 @@ using UnityEngine;
 
 public class FinanceSystem : MonoBehaviour
 {
+    #region Поля
+
     [SerializeField]
+    [Tooltip("Текущая сумма средств на счету")]
     private float currentSum;
+
     [SerializeField, Min(1)]
+    [Tooltip("Дневная оплата за аренду помещения")]
     private float dayRentCost = 500;
+
     [SerializeField, Min(1)]
+    [Tooltip("Дневная оплата коммунальных услуг")]
     private float dayUtilityCosts = 25;
-    [SerializeField, TextArea(5, 10)]
-    private string financeLostText;
 
+    private EmployeeProjectData projectData;
+    private EmployeeSystem employeeSystem;
 
+    #endregion
+
+    #region Свойства
+
+    /// <summary>
+    /// Текущая сумма
+    /// </summary>
     public float CurrentSum
     {
         get
@@ -25,19 +39,36 @@ public class FinanceSystem : MonoBehaviour
             if (currentSum < 0)
             {
                 currentSum = 0;
-                financeLost?.Invoke(true);
-                GameUICenter.messageQueue.PrepareMessage("Вы - банкроты!", financeLostText);
+                FinanceLost?.Invoke(true);
+                GameUICenter.messageQueue.PrepareMessage(projectData.lostMoneyMessage.Header,
+                    projectData.lostMoneyMessage.Message);
             }
             else
             {
-                financeLost?.Invoke(false);
+                FinanceLost?.Invoke(false);
             }
-            currentSummChanged?.Invoke(currentSum);
+            CurrentSummChanged?.Invoke(currentSum);
         }
     }
+
+    /// <summary>
+    /// Текущая дневная оплата по чеку за всё: зрплата сотрудникам, аренда и коммуналка
+    /// </summary>
     public float CurrentDayCost => DayRentCosts + DayUtilityCosts + DayEmployesPayment;
+
+    /// <summary>
+    /// Дневная оплата аренды
+    /// </summary>
     public float DayRentCosts => dayRentCost;
+
+    /// <summary>
+    /// Дневная оплата коммунальных услуг
+    /// </summary>
     public float DayUtilityCosts => dayUtilityCosts;
+
+    /// <summary>
+    /// Дневная оплата заработной платы всем сотрудникам
+    /// </summary>
     public float DayEmployesPayment
     {
         get
@@ -53,38 +84,58 @@ public class FinanceSystem : MonoBehaviour
         }
     }
 
-    public event Action<float> currentSummChanged;
-    public event Action currentRentCostChanged;
-    public event Action<bool> financeLost;
+    #endregion
 
-    private EmployeeSystem employeeSystem;
-   
+    #region События
+
+    public event Action<float> CurrentSummChanged;
+    public event Action CurrentRentCostChanged;
+    public event Action<bool> FinanceLost;
+
+    #endregion
+
+    #region Методы
+
+    public void SetUp(EmployeeProjectData projectData)
+    {
+        this.projectData = projectData;
+        CurrentSummChanged?.Invoke(currentSum);
+    }
+
+    public void SubscribeEvents(TimeSystem timeSystem, EmployeeSystem employeeSystem)
+    {
+        timeSystem.EndWork += OnDayEnded;
+        this.employeeSystem = employeeSystem;
+    }
+
+    /// <summary>
+    /// Добавить финансы
+    /// </summary>
+    /// <param name="money">Сумма, на которую будет увеличен ваш счёт</param>
     public void AddMoney(int money)
     {
         CurrentSum += money;
     }
 
+    /// <summary>
+    /// Назначить новую сумму арендной платы
+    /// </summary>
+    /// <param name="newArendaCost">Новый размер арендной платы</param>
     public void SetArendaCost(float newArendaCost)
     {
         dayRentCost = newArendaCost;
-        currentRentCostChanged?.Invoke();
+        CurrentRentCostChanged?.Invoke();
     }
 
-    public void SetUp()
-    {
-        currentSummChanged?.Invoke(currentSum);
-    }
-
-    public void SubscribeEvents(TimeSystem timeSystem, EmployeeSystem employeeSystem)
-    {
-        timeSystem.endWork += OnDayEnded;
-        this.employeeSystem = employeeSystem;
-    }
-
+    /// <summary>
+    /// В конце дня происходит подсчёт текущего чека. Он отнимается от вашего счёта
+    /// </summary>
     private void OnDayEnded()
     {
-        GameUICenter.messageQueue.PrepareMessage("Ваш чек", "За аренду помещения и сопутствующие услуги требуется заплатить " + 
-            CurrentDayCost.ToString() + ".");
+        MessagePanelPack pack = MessagePanelPack.GetCheckMessagePack(CurrentDayCost);
+        GameUICenter.messageQueue.PrepareMessage(pack.Header, pack.Message);
         CurrentSum -= CurrentDayCost;
     }
+
+    #endregion
 }
